@@ -76,6 +76,26 @@ namespace PlantSpirit.GGJ.Tests
         }
 
         [Test]
+        public void ThreeSecondPoisonDealsThreeTicksAndThenExpires()
+        {
+            GameObject target = new GameObject("PoisonDurationTarget");
+            Hurtbox2D hurtbox = target.AddComponent<Hurtbox2D>();
+            Receiver receiver = new Receiver();
+            hurtbox.Receiver = receiver;
+            StatusController status = target.AddComponent<StatusController>();
+
+            status.ApplyPoisonAt(6f, 3f, .3f, 0f);
+            status.TickAt(1f);
+            status.TickAt(2f);
+            status.TickAt(3f);
+
+            Assert.That(receiver.Hits, Is.EqualTo(3));
+            Assert.That(receiver.Total, Is.EqualTo(18f));
+            Assert.That(status.SlowPercent, Is.Zero);
+            Object.DestroyImmediate(target);
+        }
+
+        [Test]
         public void IronRootReducesTwelveDamageToNine()
         {
             GameObject player = new GameObject("Player");

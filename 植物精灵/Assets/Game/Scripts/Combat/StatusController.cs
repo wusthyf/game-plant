@@ -26,10 +26,17 @@ namespace PlantSpirit.GGJ
         private void Update() => TickAt(Time.time);
         public void TickAt(float now)
         {
-            if (now >= poisonUntil) { SlowPercent = 0f; return; }
-            if (now < nextPoisonTick) return;
-            nextPoisonTick += 1f;
-            receiver?.TryReceive(new DamageInfo { AttackInstanceId = GetInstanceID() + Mathf.FloorToInt(now * 100f), Amount = poisonDamage, Source = gameObject, Type = DamageType.Poison });
+            while (nextPoisonTick > 0f && nextPoisonTick <= poisonUntil + .0001f && now >= nextPoisonTick)
+            {
+                float tickTime = nextPoisonTick;
+                nextPoisonTick += 1f;
+                receiver?.TryReceive(new DamageInfo { AttackInstanceId = GetInstanceID() + Mathf.FloorToInt(tickTime * 100f), Amount = poisonDamage, Source = gameObject, Type = DamageType.Poison });
+            }
+            if (now < poisonUntil) return;
+            poisonUntil = 0f;
+            poisonDamage = 0f;
+            nextPoisonTick = 0f;
+            SlowPercent = 0f;
         }
     }
 }
