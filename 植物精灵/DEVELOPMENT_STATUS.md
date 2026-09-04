@@ -2,6 +2,8 @@
 
 更新日期：2026-09-05
 
+项目的里程碑、任务编号、风险和 Git 工作流统一维护在仓库根目录的 `PROJECT_PLAN.md`。本文件记录游戏工程的技术交接状态。
+
 ## 当前基线
 
 当前 Unity 工程是“GGJ48H 可玩 Demo”基线，不是 V1.1 根门推进版的完整垂直切片。正式入口为 `Assets/Game/Scenes/MainMenu.unity`，随后进入 `Level01.unity`。
