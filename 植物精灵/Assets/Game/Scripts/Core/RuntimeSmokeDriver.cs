@@ -148,6 +148,9 @@ namespace PlantSpirit.GGJ
             if (!Require(combat.RequestSkill(), "Poison skill could not start")) yield break;
             yield return new WaitForSeconds(1.4f);
             if (!Require(poisonTarget.CurrentHealth < 100f && Mathf.Approximately(poisonStatus.SlowPercent, .3f), "Poison skill did not apply DOT and 30% slow")) yield break;
+            yield return new WaitForSeconds(3.1f);
+            if (!Require(Mathf.Approximately(poisonTarget.CurrentHealth, 82f) && Mathf.Approximately(poisonStatus.SlowPercent, 0f),
+                "Three-second poison expected health=82 slow=0 but was health=" + poisonTarget.CurrentHealth + " slow=" + poisonStatus.SlowPercent)) yield break;
             Destroy(poisonTarget.gameObject);
 
             yield return new WaitForSeconds(1f);

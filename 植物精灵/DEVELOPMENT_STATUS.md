@@ -27,15 +27,17 @@
 - 修复死亡延迟期间可进入嫁接而永久暂停死亡结算的软锁。
 - 传送门进入阶段锁定移动、攻击和 Gameplay 输入。
 - 投射物改为扫掠检测，降低低帧率下穿过受击框的概率。
+- 修复毒雾每帧续期导致效果超出技能生命周期，以及到期时漏掉最后一跳伤害的问题；现在 3 秒内固定造成 3 次共 18 点伤害并清除减速。
 - 增加地面减速度与最大下落速度配置，并让正式构建清理旧构建缓存。
 - 接入 15 个 CC0 音效、Master/Music/SFX Audio Mixer、持久化音量设置及菜单滑杆。
 - README 与 Credits 已更新为当前真实资源状态。
 
 ## 验证结果
 
-- EditMode：12/12 通过，最新结果文件为 `Build/Validation/PCStabilityEditModeResults.xml`。
+- EditMode：13/13 通过，最新结果文件为 `Build/Validation/PoisonEditModeResults.xml`。
 - Windows Release：构建成功，入口为 `Build/Windows/PlantSpirit.exe`。
 - 成品自动试玩：正常 GPU 模式连续三次退出码均为 0，覆盖音频设置、Mixer 运行时应用、美术、方向键、嫁接开关、三战区、三嫁接效果、传送门锁定、结果、重开、死亡延迟与返回菜单；对应日志为 `Build/Validation/PC1280x720.log`、`PC1600x900.log`、`PC1920x1080.log`。
+- 毒雾修复成品回归：1280x800 正常 GPU 模式退出码 0，强制检查 3 秒毒伤总量为 18 且减速归零；日志为 `Build/Validation/PoisonGpuSmoke.log`。
 - 本轮 PC 构建与正常 GPU 成品日志未发现编译错误、运行异常或流程失败。
 
 ## 仍未完成
