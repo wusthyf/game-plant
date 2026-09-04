@@ -13,6 +13,7 @@ namespace PlantSpirit.GGJ
             if (item == null || GameBootstrap.Instance == null || !GameBootstrap.Instance.Session.Inventory.Exists(x => x.Id == item.Id)) return false;
             GameBootstrap.Instance.Session.Equip(item);
             combat?.RefreshLoadout();
+            GameAudio.Play(AudioCue.GraftConfirm);
             Applied?.Invoke(item);
             return true;
         }

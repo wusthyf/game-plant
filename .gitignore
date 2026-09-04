@@ -8,6 +8,7 @@
 [Uu]ser[Ss]ettings/
 [Mm]emoryCaptures/
 [Rr]ecordings/
+**/ProjectSettings/SceneTemplateSettings.json
 
 # Unity and IDE generated files
 *.csproj

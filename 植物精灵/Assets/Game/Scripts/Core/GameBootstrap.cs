@@ -19,6 +19,7 @@ namespace PlantSpirit.GGJ
             Instance = this;
             DontDestroyOnLoad(gameObject);
             Application.targetFrameRate = 60;
+            GameAudio.Ensure();
             State.Changed += ApplyTimeScale;
             SceneManager.sceneLoaded += OnSceneLoaded;
             if (Array.Exists(Environment.GetCommandLineArgs(), argument => argument == "-plantspirit-smoke")) gameObject.AddComponent<RuntimeSmokeDriver>();

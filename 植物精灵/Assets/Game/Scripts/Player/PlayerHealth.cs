@@ -36,7 +36,8 @@ namespace PlantSpirit.GGJ
             if (body != null && info.Knockback.sqrMagnitude > 0f) body.AddForce(info.Knockback, ForceMode2D.Impulse);
             hurtIFrames = config.HurtInvincibleSeconds;
             Changed?.Invoke(Current);
-            if (Current <= 0f) { Dead = true; Died?.Invoke(); }
+            if (Current <= 0f) { Dead = true; GameAudio.Play(AudioCue.PlayerDeath); Died?.Invoke(); }
+            else GameAudio.Play(AudioCue.PlayerHurt);
             return true;
         }
 
@@ -47,7 +48,8 @@ namespace PlantSpirit.GGJ
             Current = Mathf.Max(0f, Current - amount);
             hurtIFrames = config.HurtInvincibleSeconds;
             Changed?.Invoke(Current);
-            if (Current <= 0f) { Dead = true; Died?.Invoke(); }
+            if (Current <= 0f) { Dead = true; GameAudio.Play(AudioCue.PlayerDeath); Died?.Invoke(); }
+            else GameAudio.Play(AudioCue.PlayerHurt);
         }
     }
 }

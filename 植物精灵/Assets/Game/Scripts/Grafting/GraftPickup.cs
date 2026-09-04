@@ -16,7 +16,9 @@ namespace PlantSpirit.GGJ
 
         private void OnTriggerEnter2D(Collider2D other)
         {
-            if (other.GetComponent<PlayerMotor2D>() != null && inventory != null && inventory.Add(definition)) Destroy(gameObject);
+            if (other.GetComponent<PlayerMotor2D>() == null || inventory == null || !inventory.Add(definition)) return;
+            GameAudio.Play(AudioCue.PlayerPickup);
+            Destroy(gameObject);
         }
     }
 }

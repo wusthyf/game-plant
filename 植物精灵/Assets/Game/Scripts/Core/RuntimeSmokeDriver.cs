@@ -14,7 +14,14 @@ namespace PlantSpirit.GGJ
         {
             yield return null;
             MainMenuPresenter menu = FindObjectOfType<MainMenuPresenter>();
-            if (!Require(menu != null && GameObject.Find("MenuArt") != null, "Main menu or supplied menu art missing")) yield break;
+            AudioSettingsPanel audioSettings = FindObjectOfType<AudioSettingsPanel>();
+            if (!Require(menu != null && audioSettings != null && GameObject.Find("MenuArt") != null && GameAudio.Ready && GameAudio.Instance.MixerSettingsApplied && GameAudio.IsCueAvailable(AudioCue.UiClick), "Main menu, supplied art, or audio system missing")) yield break;
+            menu.ToggleAudio();
+            yield return null;
+            if (!Require(audioSettings.IsOpen, "Audio settings panel did not open")) yield break;
+            menu.ToggleAudio();
+            yield return null;
+            if (!Require(!audioSettings.IsOpen, "Audio settings panel did not close")) yield break;
             menu.StartGame();
 
             float deadline = Time.realtimeSinceStartup + 8f;
@@ -173,7 +180,7 @@ namespace PlantSpirit.GGJ
             while ((SceneManager.GetActiveScene().name != "MainMenu" || GameBootstrap.Instance.State.Current != GameState.MainMenu) && Time.realtimeSinceStartup < deadline) yield return null;
             if (!Require(SceneManager.GetActiveScene().name == "MainMenu" && FindObjectOfType<MainMenuPresenter>() != null, "Return to menu failed")) yield break;
 
-            Debug.Log("[PlantSpiritSmoke] PASS SuppliedArt-PlayerVisible-ArrowInput-GraftToggle-PlayerHurtbox-PlatformJump-DashGate-3EncounterTriggers-3Grafts-GraftEffects-PortalLock-Result-Restart-DeathDelay-Menu");
+            Debug.Log("[PlantSpiritSmoke] PASS SuppliedArt-AudioSettings-Audio-PlayerVisible-ArrowInput-GraftToggle-PlayerHurtbox-PlatformJump-DashGate-3EncounterTriggers-3Grafts-GraftEffects-PortalLock-Result-Restart-DeathDelay-Menu");
             Application.Quit(0);
         }
 

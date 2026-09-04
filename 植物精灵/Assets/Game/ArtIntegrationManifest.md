@@ -33,4 +33,4 @@ These 137 source/reference files remain in the original ZIP and are not duplicat
 
 - No beetle animation set was supplied. The beetle keeps a distinct program placeholder.
 - No separate player idle, run, jump, fall, dash, hit, or death sheets were supplied. Movement currently uses the neutral player pose with procedural bob and tilt.
-- No dedicated portal, graft icon, HUD, menu, or audio assets were supplied. Ruin and VFX pieces are reused where appropriate.
+- No dedicated portal, graft icon, HUD, or menu art assets were supplied. Fifteen separately licensed CC0 sound effects are integrated under `Assets/Game/Audio`; candidate music remains excluded pending track-level licensing details.
