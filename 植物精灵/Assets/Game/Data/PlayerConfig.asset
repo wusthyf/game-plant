@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 28d7ac9e23c87f041945b6452c12cc98, type: 3}
+  m_Name: PlayerConfig
+  m_EditorClassIdentifier: 
+  MaxHealth: 100
+  MoveSpeed: 5.2
+  GroundAcceleration: 45
+  GroundDeceleration: 55
+  AirAcceleration: 25
+  JumpVelocity: 12.5
+  MaxFallSpeed: 18
+  CoyoteSeconds: 0.12
+  JumpBufferSeconds: 0.12
+  DashDistance: 3.6
+  DashSeconds: 0.22
+  DashCooldown: 1.1
+  DashInvincibleSeconds: 0.18
+  HurtInvincibleSeconds: 0.75

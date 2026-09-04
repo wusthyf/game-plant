@@ -1,0 +1,51 @@
+# Unity generated directories
+[Ll]ibrary/
+[Tt]emp/
+[Oo]bj/
+[Bb]uild/
+[Bb]uilds/
+[Ll]ogs/
+[Uu]ser[Ss]ettings/
+[Mm]emoryCaptures/
+[Rr]ecordings/
+
+# Unity and IDE generated files
+*.csproj
+*.sln
+*.suo
+*.user
+*.userprefs
+*.pidb
+*.booproj
+*.svd
+*.pdb
+*.mdb
+*.opendb
+*.VC.db
+*.pidb.meta
+*.pdb.meta
+*.mdb.meta
+sysinfo.txt
+
+# Crash reports and packaged builds
+crashlytics-build.properties
+*.apk
+*.aab
+*.unitypackage
+
+# Python and local tooling caches
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+
+# Local Codex working files and generated document previews
+.codex_tmp/
+.codex-doc-review/
+_gdd_render*/
+
+# Operating-system files
+.DS_Store
+Thumbs.db
+Desktop.ini

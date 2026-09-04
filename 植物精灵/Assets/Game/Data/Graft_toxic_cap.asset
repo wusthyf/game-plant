@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 475c5ffa7ad8b224a8ea727e0c020bb6, type: 3}
+  m_Name: Graft_toxic_cap
+  m_EditorClassIdentifier: 
+  Id: toxic_cap
+  Slot: 2
+  DisplayName: "\u6BD2\u83CC\u4F1E"
+  Description: "\u6280\u80FD\u53D8\u4E3A\u6BD2\u96FE\uFF1A\u6301\u7EED 3 \u79D2\uFF0C\u6BCF\u79D2
+    6 \u4F24\u5BB3\u5E76\u51CF\u901F 30%\u3002"
+  DamageReduction: 0
+  AttackDamage: 6
+  AttackRange: 3
+  Cooldown: 5
+  BlocksProjectilesDuringDash: 0

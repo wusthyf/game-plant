@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 24cf4bde201e0f1468507b90dda7b2f4, type: 3}
+  m_Name: Attack_vine_attack
+  m_EditorClassIdentifier: 
+  Id: vine_attack
+  Executor: 1
+  Damage: 8
+  Startup: 0.14
+  Active: 0.06
+  Recovery: 0.14
+  Cooldown: 0.7
+  Offset: {x: 1.7, y: 0.1}
+  Size: {x: 2.8, y: 0.85}
+  Range: 2.8
+  MaxTargets: 2
