@@ -30,6 +30,7 @@ namespace PlantSpirit.GGJ
             open = true;
             WorldArtPresentation2D.AttachPortal(gameObject);
             gameObject.SetActive(true);
+            GameAudio.Play(AudioCue.PortalGrow);
         }
 
         public void TryEnter()

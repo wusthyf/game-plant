@@ -92,6 +92,7 @@ namespace PlantSpirit.GGJ
             if (jumpBuffer > 0f && coyote > 0f)
             {
                 body.velocity = new Vector2(body.velocity.x, config.JumpVelocity);
+                GameAudio.Play(AudioCue.PlayerJump);
                 jumpBuffer = 0f;
                 coyote = 0f;
             }

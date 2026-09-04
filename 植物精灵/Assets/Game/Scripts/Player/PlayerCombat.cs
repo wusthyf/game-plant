@@ -49,6 +49,7 @@ namespace PlantSpirit.GGJ
             AttackDefinition definition = CurrentStem() == "vine_tendril" ? vineAttack : defaultAttack;
             if (definition == null || hitbox == null || motor == null) return false;
             AttackStarted?.Invoke();
+            GameAudio.Play(definition == vineAttack ? AudioCue.VineSwing : AudioCue.PlayerAttackSwing);
             StartCoroutine(ExecuteMelee(definition));
             return true;
         }
@@ -83,7 +84,11 @@ namespace PlantSpirit.GGJ
             float direction = motor.Facing;
             Vector2 center = (Vector2)transform.position + new Vector2(direction * definition.Offset.x, definition.Offset.y);
             int hitCount = hitbox.StrikeBox(center, definition.Size, new DamageInfo { Amount = definition.Damage, Knockback = new Vector2(direction * 4f, 1f), Source = gameObject }, definition.MaxTargets);
-            if (hitCount > 0) WorldArtPresentation2D.SpawnBurst(center, .72f);
+            if (hitCount > 0)
+            {
+                GameAudio.Play(AudioCue.PlayerAttackHit);
+                WorldArtPresentation2D.SpawnBurst(center, .72f);
+            }
             yield return new WaitForSeconds(definition.Active);
             hitbox.Close();
             yield return new WaitForSeconds(definition.Recovery);
@@ -98,6 +103,7 @@ namespace PlantSpirit.GGJ
             if (!CanContinueAction()) yield break;
             if (definition.Executor == AttackExecutorType.PoisonZone)
             {
+                GameAudio.Play(AudioCue.PoisonCast);
                 GameObject zone = new GameObject("PoisonZone");
                 zone.transform.position = transform.position + Vector3.right * motor.Facing * definition.Range;
                 zone.AddComponent<PlaceholderVisual>().Configure(new Color(.58f, .2f, .68f, .42f), new Vector2(6f, 1.7f), 1);

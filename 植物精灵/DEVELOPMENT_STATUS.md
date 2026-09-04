@@ -27,19 +27,20 @@
 - 传送门进入阶段锁定移动、攻击和 Gameplay 输入。
 - 投射物改为扫掠检测，降低低帧率下穿过受击框的概率。
 - 增加地面减速度与最大下落速度配置，并让正式构建清理旧构建缓存。
+- 接入 15 个 CC0 音效、Master/Music/SFX Audio Mixer、持久化音量设置及菜单滑杆。
 - README 与 Credits 已更新为当前真实资源状态。
 
 ## 验证结果
 
-- EditMode：10/10 通过，结果文件为 `Build/Validation/MissingScriptGuardResults.xml`。
+- EditMode：12/12 通过，结果文件为 `Build/Validation/AudioEditModeResults.xml`。
 - Windows Release：构建成功，入口为 `Build/Windows/PlantSpirit.exe`。
-- 成品自动试玩：退出码 0，覆盖美术、方向键、嫁接开关、三战区、三嫁接效果、传送门锁定、结果、重开、死亡延迟与返回菜单；日志为 `Build/Validation/HandoverRuntimeSmoke3.log`。
+- 成品自动试玩：退出码 0，覆盖音频设置、Mixer 运行时应用、美术、方向键、嫁接开关、三战区、三嫁接效果、传送门锁定、结果、重开、死亡延迟与返回菜单；日志为 `Build/Validation/AudioRuntimeSmoke.log`。
 
 ## 仍未完成
 
 GGJ Demo 规格中的剩余项：
 
-- 主菜单音量控件、Audio Mixer、音乐和音效尚未接入。
+- 背景音乐尚未接入；现有四首候选音乐缺少逐首来源与授权说明。
 - 甲虫动画、主角待机/跑/跳/落/冲刺/受击/死亡、Portal、嫁接图标和正式 UI 资产缺失。
 - 手柄未做完整验收；主流程仍需要人工进行多分辨率和三局连续试玩。
 - 当前关卡和敌人仍偏 Demo 化：敌人由 Encounter 运行时创建，尚无正式 Prefab、RoomData 或完整数据校验。
@@ -52,6 +53,6 @@ V1.1 根门推进版尚未开始的核心内容：
 
 ## 建议下一里程碑
 
-若继续做可提交的 GGJ Demo，优先顺序为：音量与音频服务、剩余关键表现、人工三局/多分辨率验收。
+若继续做可提交的 GGJ Demo，优先顺序为：手柄与 UI 导航、人工三局/多分辨率验收、剩余关键表现。
 
 若转入 V1.1 垂直切片，先冻结首章 8 个特征与 2 条融合，再实现 `RunSeed + RoomDefinition + RootGate` 的三个灰盒房间闭环；不要直接在现有 `Level01` 大场景里继续硬编码路线。

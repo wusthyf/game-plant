@@ -90,6 +90,7 @@ namespace PlantSpirit.GGJ
         {
             if (Dead) return false;
             CurrentHealth -= info.Amount;
+            GameAudio.Play(AudioCue.EnemyHurt);
             if (body != null) body.AddForce(info.Knockback, ForceMode2D.Impulse);
             if (CurrentHealth <= 0f) Die();
             else Damaged?.Invoke(this);
@@ -113,7 +114,11 @@ namespace PlantSpirit.GGJ
             if (body != null) body.velocity = new Vector2(0f, body.velocity.y);
         }
 
-        protected void NotifyAttackStarted() => AttackStarted?.Invoke(this);
+        protected void NotifyAttackStarted()
+        {
+            if (kind == EnemyKind.Vine) GameAudio.Play(AudioCue.EnemyVineTelegraph);
+            AttackStarted?.Invoke(this);
+        }
     }
 
     public sealed class VineEnemy : EnemyController
@@ -143,6 +148,7 @@ namespace PlantSpirit.GGJ
             yield return new WaitForSeconds(.65f);
             SetTelegraph(false);
             if (Dead || target == null) yield break;
+            GameAudio.Play(AudioCue.EnemyMushroomShoot);
             GameObject bullet = new GameObject("MushroomProjectile");
             bullet.layer = 11;
             bullet.transform.position = transform.position;
@@ -170,6 +176,7 @@ namespace PlantSpirit.GGJ
         {
             cooldown = 3f;
             NotifyAttackStarted();
+            GameAudio.Play(AudioCue.EnemyBeetleCharge);
             SetTelegraph(true);
             yield return new WaitForSeconds(.8f);
             SetTelegraph(false);

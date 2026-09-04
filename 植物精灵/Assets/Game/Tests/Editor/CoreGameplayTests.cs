@@ -2,6 +2,7 @@ using NUnit.Framework;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
+using UnityEngine.Audio;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
 
@@ -115,6 +116,48 @@ namespace PlantSpirit.GGJ.Tests
         }
 
         [Test]
+        public void AudioVolumeConversionUsesLogarithmicDecibels()
+        {
+            Assert.That(GameAudioSettings.ToDecibels(1f), Is.EqualTo(0f).Within(.001f));
+            Assert.That(GameAudioSettings.ToDecibels(.5f), Is.EqualTo(-6.0206f).Within(.001f));
+            Assert.That(GameAudioSettings.ToDecibels(0f), Is.EqualTo(-80f));
+        }
+
+        [Test]
+        public void AudioMixerAndLicensedSfxAreConfigured()
+        {
+            const string audioRoot = "Assets/Game/Audio/Resources/PlantSpirit/Audio/SFX";
+            string[] clips = AssetDatabase.FindAssets("t:AudioClip", new[] { audioRoot });
+            Assert.That(clips.Length, Is.EqualTo(15));
+            foreach (string guid in clips)
+            {
+                AudioImporter importer = AssetImporter.GetAtPath(AssetDatabase.GUIDToAssetPath(guid)) as AudioImporter;
+                Assert.That(importer, Is.Not.Null);
+                Assert.That(importer.forceToMono, Is.True);
+                Assert.That(importer.defaultSampleSettings.preloadAudioData, Is.True);
+                Assert.That(importer.defaultSampleSettings.loadType, Is.EqualTo(AudioClipLoadType.DecompressOnLoad));
+                Assert.That(importer.defaultSampleSettings.compressionFormat, Is.EqualTo(AudioCompressionFormat.PCM));
+            }
+
+            AudioMixer mixer = AssetDatabase.LoadAssetAtPath<AudioMixer>(Editor.AudioAssetSetup.MixerPath);
+            Assert.That(mixer, Is.Not.Null);
+            AudioMixerGroup[] groups = mixer.FindMatchingGroups("Master");
+            Assert.That(groups.Length, Is.EqualTo(3));
+            Assert.That(System.Array.Exists(groups, group => group.name == "Master"), Is.True);
+            Assert.That(mixer.FindMatchingGroups("Music").Length, Is.EqualTo(1));
+            Assert.That(mixer.FindMatchingGroups("SFX").Length, Is.EqualTo(1));
+            SerializedProperty exposed = new SerializedObject(mixer).FindProperty("m_ExposedParameters");
+            Assert.That(exposed.arraySize, Is.EqualTo(3));
+            var names = new System.Collections.Generic.HashSet<string>();
+            for (int i = 0; i < exposed.arraySize; i++)
+                names.Add(exposed.GetArrayElementAtIndex(i).FindPropertyRelative("name").stringValue);
+            CollectionAssert.AreEquivalent(new[] { "MasterVolume", "MusicVolume", "SfxVolume" }, names);
+            SerializedProperty views = new SerializedObject(mixer).FindProperty("m_AudioMixerGroupViews");
+            Assert.That(views.arraySize, Is.EqualTo(1));
+            Assert.That(views.GetArrayElementAtIndex(0).FindPropertyRelative("guids").arraySize, Is.EqualTo(3));
+        }
+
+        [Test]
         public void SuppliedArtIsImportedWithExpectedSequencesAndSettings()
         {
             const string artRoot = "Assets/Game/Art/Resources/PlantSpirit";
@@ -189,8 +232,16 @@ namespace PlantSpirit.GGJ.Tests
             SerializedObject data = new SerializedObject(presenter);
             Assert.That(data.FindProperty("startButton").objectReferenceValue, Is.Not.Null);
             Assert.That(data.FindProperty("controlsButton").objectReferenceValue, Is.Not.Null);
+            Assert.That(data.FindProperty("audioButton").objectReferenceValue, Is.Not.Null);
             Assert.That(data.FindProperty("quitButton").objectReferenceValue, Is.Not.Null);
             Assert.That(data.FindProperty("controlsPanel").objectReferenceValue, Is.Not.Null);
+            Assert.That(data.FindProperty("audioSettingsPanel").objectReferenceValue, Is.Not.Null);
+            AudioSettingsPanel audioSettings = Object.FindObjectOfType<AudioSettingsPanel>(true);
+            Assert.That(audioSettings, Is.Not.Null);
+            SerializedObject settingsData = new SerializedObject(audioSettings);
+            Assert.That(settingsData.FindProperty("masterSlider").objectReferenceValue, Is.Not.Null);
+            Assert.That(settingsData.FindProperty("musicSlider").objectReferenceValue, Is.Not.Null);
+            Assert.That(settingsData.FindProperty("sfxSlider").objectReferenceValue, Is.Not.Null);
             AssertSceneHasNoMissingScripts(scene);
         }
 

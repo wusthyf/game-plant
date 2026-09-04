@@ -1,0 +1,25 @@
+=== 植物精灵 · 音频授权说明 ===
+
+【音效】
+文件：player_jump.wav
+作者：MoxieCat
+来源：OpenGameArt - 8-bit Platformer SFX
+许可证：CC0 1.0
+
+文件：player_attack_swing.wav, player_attack_hit.wav, player_hurt.wav, player_death.wav,
+player_pickup.wav, graft_confirm.wav, poison_cast.wav, enemy_vine_telegraph.wav,
+enemy_mushroom_shoot.wav, enemy_beetle_charge.wav, enemy_hurt_shared.wav,
+portal_grow.wav, ui_click.wav
+作者：rubberduck
+来源：OpenGameArt - 80 CC0 RPG SFX
+许可证：CC0 1.0
+
+文件：vine_swing.wav
+作者：BigSoundBank
+来源：BigSoundBank - Whoosh #10（bamboo stick whoosh）
+许可证：CC0 1.0
+
+处理说明：所有文件均整理为单声道、48 kHz、24-bit PCM WAV；音效不循环。
+portal_grow.wav 由 CC0 法术音效片段组合为约 3~5 秒的传送门生长音。
+
+本项目音频素材确认可用于非商业 Game Jam 发布。
