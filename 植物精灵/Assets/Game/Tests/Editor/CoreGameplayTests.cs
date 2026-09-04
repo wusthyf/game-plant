@@ -244,6 +244,31 @@ namespace PlantSpirit.GGJ.Tests
         }
 
         [Test]
+        public void GameplayHudStaysInsideSupportedPcViewports()
+        {
+            EditorSceneManager.OpenScene("Assets/Game/Scenes/Level01.unity", OpenSceneMode.Single);
+            GameUiController ui = Object.FindObjectOfType<GameUiController>(true);
+            CanvasScaler scaler = Object.FindObjectOfType<CanvasScaler>(true);
+            Assert.That(ui, Is.Not.Null);
+            Assert.That(scaler, Is.Not.Null);
+            SerializedObject uiData = new SerializedObject(ui);
+            Text hud = (Text)uiData.FindProperty("hud").objectReferenceValue;
+            Text interaction = (Text)uiData.FindProperty("interactionText").objectReferenceValue;
+            Vector2[] viewports =
+            {
+                new Vector2(1280f, 720f),
+                new Vector2(1280f, 800f),
+                new Vector2(1920f, 1080f),
+                new Vector2(5120f, 1440f)
+            };
+            foreach (Vector2 viewport in viewports)
+            {
+                AssertDirectCanvasChildFits(hud.rectTransform, scaler, viewport, "HUD");
+                AssertDirectCanvasChildFits(interaction.rectTransform, scaler, viewport, "Interaction prompt");
+            }
+        }
+
+        [Test]
         public void MainMenuPresenterHasSerializedControls()
         {
             var scene = EditorSceneManager.OpenScene("Assets/Game/Scenes/MainMenu.unity", OpenSceneMode.Single);
@@ -281,6 +306,25 @@ namespace PlantSpirit.GGJ.Tests
                 foreach (Transform item in root.GetComponentsInChildren<Transform>(true))
                     Assert.That(GameObjectUtility.GetMonoBehavioursWithMissingScriptCount(item.gameObject), Is.Zero,
                         item.gameObject.name + " contains a missing MonoBehaviour reference.");
+        }
+
+        private static void AssertDirectCanvasChildFits(RectTransform rect, CanvasScaler scaler, Vector2 viewport, string label)
+        {
+            Assert.That(rect.anchorMin, Is.EqualTo(rect.anchorMax), label + " must use a fixed screen anchor.");
+            float widthScale = viewport.x / scaler.referenceResolution.x;
+            float heightScale = viewport.y / scaler.referenceResolution.y;
+            float logScale = Mathf.Lerp(Mathf.Log(widthScale, 2f), Mathf.Log(heightScale, 2f), scaler.matchWidthOrHeight);
+            float scale = Mathf.Pow(2f, logScale);
+            Vector2 anchor = Vector2.Scale(viewport, rect.anchorMin);
+            Vector2 pivot = anchor + rect.anchoredPosition * scale;
+            Vector2 size = rect.sizeDelta * scale;
+            Vector2 minimum = pivot - Vector2.Scale(size, rect.pivot);
+            Vector2 maximum = minimum + size;
+
+            Assert.That(minimum.x, Is.GreaterThanOrEqualTo(-.1f), label + " extends left at " + viewport + ".");
+            Assert.That(minimum.y, Is.GreaterThanOrEqualTo(-.1f), label + " extends below at " + viewport + ".");
+            Assert.That(maximum.x, Is.LessThanOrEqualTo(viewport.x + .1f), label + " extends right at " + viewport + ".");
+            Assert.That(maximum.y, Is.LessThanOrEqualTo(viewport.y + .1f), label + " extends above at " + viewport + ".");
         }
     }
 }
