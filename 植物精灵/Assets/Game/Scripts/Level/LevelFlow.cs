@@ -52,6 +52,7 @@ namespace PlantSpirit.GGJ
         {
             if (bossStarted) return;
             bossStarted = true;
+            GameAudio.PlayBossMusic();
             Vector3 point = portal == null ? Vector3.zero : portal.transform.position + Vector3.left * 3f;
             GameObject shrine = new GameObject("HealingShrine"); shrine.transform.position = point + Vector3.left * 2f;
             shrine.AddComponent<PlaceholderVisual>().Configure(new Color(.35f, 1f, .62f), new Vector2(.7f, 1.1f), 3);

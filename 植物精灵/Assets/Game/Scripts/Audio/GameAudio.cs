@@ -72,6 +72,7 @@ namespace PlantSpirit.GGJ
         private const string SfxResource = AudioRoot + "/SFX";
         private const string MenuMusicResource = AudioRoot + "/Music/menu_music";
         private const string LevelMusicResource = AudioRoot + "/Music/level_music";
+        private const string BossMusicResource = AudioRoot + "/Music/boss_music";
 
         private static readonly Dictionary<AudioCue, string> CueNames = new Dictionary<AudioCue, string>
         {
@@ -115,7 +116,7 @@ namespace PlantSpirit.GGJ
 
         public static GameAudio Instance { get; private set; }
         public static bool Ready => Instance != null && Instance.sfx.Count == CueNames.Count;
-        public static bool MusicReady => Instance != null && Instance.menuMusic != null && Instance.levelMusic != null;
+        public static bool MusicReady => Instance != null && Instance.menuMusic != null && Instance.levelMusic != null && Instance.bossMusic != null;
         public bool MixerSettingsApplied { get; private set; }
         public bool IsMusicPlaying => musicSource != null && musicSource.isPlaying;
         public bool HasAudioListener => FindObjectOfType<AudioListener>() != null;
@@ -130,6 +131,7 @@ namespace PlantSpirit.GGJ
         private AudioSource sfxSource;
         private AudioClip menuMusic;
         private AudioClip levelMusic;
+        private AudioClip bossMusic;
 
         public static GameAudio Ensure()
         {
@@ -148,6 +150,12 @@ namespace PlantSpirit.GGJ
         public static bool IsCueAvailable(AudioCue cue)
         {
             return Instance != null && Instance.sfx.ContainsKey(cue);
+        }
+
+        public static void PlayBossMusic()
+        {
+            GameAudio audio = Ensure();
+            audio.PlayMusic(audio.bossMusic);
         }
 
         private void Awake()
@@ -193,6 +201,7 @@ namespace PlantSpirit.GGJ
             Debug.Log("[PlantSpiritAudio] Loading music clips.");
             menuMusic = Resources.Load<AudioClip>(MenuMusicResource);
             levelMusic = Resources.Load<AudioClip>(LevelMusicResource);
+            bossMusic = Resources.Load<AudioClip>(BossMusicResource);
 
             Debug.Log("[PlantSpiritAudio] Loading SFX clips.");
             AudioClip[] clips = Resources.LoadAll<AudioClip>(SfxResource);
@@ -203,6 +212,7 @@ namespace PlantSpirit.GGJ
 
             if (menuMusic == null) Debug.LogError("Missing menu music at Resources/" + MenuMusicResource + ".");
             if (levelMusic == null) Debug.LogError("Missing level music at Resources/" + LevelMusicResource + ".");
+            if (bossMusic == null) Debug.LogError("Missing boss music at Resources/" + BossMusicResource + ".");
             foreach (KeyValuePair<AudioCue, string> cue in CueNames)
                 if (!sfx.ContainsKey(cue.Key)) Debug.LogError("Missing audio cue at Resources/" + SfxResource + "/" + cue.Value + ".");
         }
@@ -269,8 +279,13 @@ namespace PlantSpirit.GGJ
 
         private void PlayMusicForScene(string sceneName)
         {
-            if (musicSource == null) return;
             AudioClip next = sceneName == "MainMenu" ? menuMusic : sceneName == "Level01" ? levelMusic : null;
+            PlayMusic(next);
+        }
+
+        private void PlayMusic(AudioClip next)
+        {
+            if (musicSource == null) return;
             if (musicSource.clip == next) return;
             musicSource.Stop();
             musicSource.clip = next;
