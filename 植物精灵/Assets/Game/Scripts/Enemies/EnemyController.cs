@@ -138,22 +138,23 @@ namespace PlantSpirit.GGJ
                 if (body != null) body.velocity = new Vector2(velocity, body.velocity.y);
                 else transform.position += Vector3.right * velocity * Time.deltaTime;
             }
-            if (distance <= 5.5f && cooldown <= 0f) StartCoroutine(Shot());
+            if (distance <= 3f && cooldown <= 0f) StartCoroutine(Shot());
         }
         private IEnumerator Shot()
         {
-            cooldown = 2.2f;
+            cooldown = 4f;
             NotifyAttackStarted();
             SetTelegraph(true);
             yield return new WaitForSeconds(.65f);
             SetTelegraph(false);
             if (Dead || target == null) yield break;
             GameAudio.Play(AudioCue.EnemyMushroomShoot);
-            GameObject bullet = new GameObject("MushroomProjectile");
-            bullet.layer = 11;
-            bullet.transform.position = transform.position;
-            bullet.AddComponent<PlaceholderVisual>().Configure(new Color(.85f, .22f, .72f), Vector2.one * .3f, 5);
-            bullet.AddComponent<Projectile2D>().Launch(((Vector2)(target.position - transform.position)).normalized * 5f, damage, 3f, 1 << 9, GetInstanceID() + Time.frameCount);
+            Vector2 direction = ((Vector2)(target.position - transform.position)).normalized;
+            GameObject cloud = new GameObject("MushroomPoisonCloud");
+            cloud.transform.position = (Vector2)transform.position + direction * 1.1f;
+            cloud.AddComponent<PlaceholderVisual>().Configure(new Color(.65f, .18f, .7f, .42f), new Vector2(2.4f, 1.25f), 2);
+            PoisonZone poison = cloud.AddComponent<PoisonZone>();
+            poison.Activate(damage, 2f, 0f, 1 << 9);
         }
     }
 

@@ -25,6 +25,12 @@ namespace PlantSpirit.GGJ
         }
         private void Update() => hurtIFrames -= Time.deltaTime;
         public void ResetHealth() { Current = config.MaxHealth; Dead = false; hurtIFrames = 0; Changed?.Invoke(Current); }
+        public void RestoreFull()
+        {
+            if (config == null || Dead) return;
+            Current = config.MaxHealth;
+            Changed?.Invoke(Current);
+        }
         public bool TryReceive(DamageInfo info)
         {
             if (GameBootstrap.Instance != null && GameBootstrap.Instance.State.Current != GameState.Playing) return false;

@@ -15,8 +15,16 @@ namespace PlantSpirit.GGJ
         [SerializeField] private GraftInventory inventory;
         [SerializeField] private Transform player;
         private readonly HashSet<EnemyController> living = new HashSet<EnemyController>();
+        private static readonly EnemyKind[][] RoomOneWaves =
+        {
+            new[] { EnemyKind.Vine, EnemyKind.Vine, EnemyKind.Mushroom },
+            new[] { EnemyKind.Beetle, EnemyKind.Beetle },
+            new[] { EnemyKind.Mushroom, EnemyKind.Beetle },
+            new[] { EnemyKind.Vine, EnemyKind.Vine }
+        };
         private bool started;
         private bool cleared;
+        private int waveIndex;
 
         public int Order => order;
         public int Remaining => living.Count;
@@ -40,7 +48,7 @@ namespace PlantSpirit.GGJ
             started = true;
             if (leftGate != null) leftGate.SetActive(true);
             if (rightGate != null) rightGate.SetActive(true);
-            for (int i = 0; i < enemies.Length; i++) SpawnEnemy(enemies[i], spawnPoints[i % spawnPoints.Length]);
+            SpawnWave();
         }
 
         public void UnlockEntry()
@@ -63,7 +71,10 @@ namespace PlantSpirit.GGJ
             obj.AddComponent<Hurtbox2D>();
             obj.AddComponent<StatusController>();
             EnemyController enemy = enemyKind == EnemyKind.Vine ? obj.AddComponent<VineEnemy>() : enemyKind == EnemyKind.Mushroom ? obj.AddComponent<MushroomEnemy>() : obj.AddComponent<BeetleEnemy>();
-            enemy.Configure(enemyKind, player, enemyKind == EnemyKind.Beetle ? 44f : 28f, enemyKind == EnemyKind.Beetle ? 1.7f : 1.25f, enemyKind == EnemyKind.Beetle ? 12f : 8f);
+            float health = enemyKind == EnemyKind.Vine ? 25f : enemyKind == EnemyKind.Mushroom ? 18f : 35f;
+            float moveSpeed = enemyKind == EnemyKind.Vine ? 1.8f : enemyKind == EnemyKind.Mushroom ? .6f : 3.2f;
+            float attackDamage = enemyKind == EnemyKind.Vine ? 8f : enemyKind == EnemyKind.Mushroom ? 6f : 12f;
+            enemy.Configure(enemyKind, player, health, moveSpeed, attackDamage);
             Bounds bounds = GetComponent<Collider2D>().bounds;
             enemy.SetAllowedBounds(bounds.min.x + .45f, bounds.max.x - .45f);
             enemy.Died += OnEnemyDied;
@@ -81,7 +92,25 @@ namespace PlantSpirit.GGJ
             if (!living.Remove(enemy)) return;
             if (GameBootstrap.Instance != null) GameBootstrap.Instance.Session.RegisterEnemyDefeated();
             if (living.Count != 0) return;
+            if (order == 0 && waveIndex < RoomOneWaves.Length - 1)
+            {
+                waveIndex++;
+                StartCoroutine(BeginNextWave());
+                return;
+            }
             CompleteOnce();
+        }
+
+        private void SpawnWave()
+        {
+            EnemyKind[] roster = order == 0 ? RoomOneWaves[waveIndex] : enemies;
+            for (int i = 0; i < roster.Length; i++) SpawnEnemy(roster[i], spawnPoints[i % spawnPoints.Length]);
+        }
+
+        private IEnumerator BeginNextWave()
+        {
+            yield return new WaitForSeconds(2f);
+            if (!cleared && GameBootstrap.Instance != null && GameBootstrap.Instance.State.Current == GameState.Playing) SpawnWave();
         }
 
         private void CompleteOnce()
