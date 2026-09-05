@@ -33,20 +33,30 @@ namespace PlantSpirit.GGJ
         private int selected;
         private bool bound;
         private Coroutine deadRevealRoutine;
+
+        private void Awake() => EnsureGraftPresentation();
+
         public void Configure(GameObject graft, GameObject pause, GameObject dead, GameObject result, Text hudText, Text graftPanelText, Text deadPanelText, Text resultPanelText, Text interactionPrompt, PlayerHealth playerHealth, GraftApplier graftApplier, InputReader reader, ExitPortal exitPortal)
         { Unbind(); graftPanel = graft; pausePanel = pause; deadPanel = dead; resultPanel = result; hud = hudText; graftText = graftPanelText; graftPresentation = graft == null ? null : graft.GetComponent<GraftPanelPresentation>(); deadText = deadPanelText; resultText = resultPanelText; interactionText = interactionPrompt; health = playerHealth; applier = graftApplier; input = reader; portal = exitPortal; Bind(); }
         public void ConfigureButtons(Button root, Button stem, Button flower, Button closeGraft, Button resume, Button pauseMenu, Button deadRestart, Button deadMenu, Button resultRetry, Button resultMenu)
         {
             Unbind();
             rootButton = root; stemButton = stem; flowerButton = flower; closeGraftButton = closeGraft;
-            graftPresentation = GraftPanelPresentation.Ensure(graftPanel, rootButton, stemButton, flowerButton, closeGraftButton) ?? graftPresentation;
+            EnsureGraftPresentation();
             resumeButton = resume; pauseMenuButton = pauseMenu; deadRestartButton = deadRestart; deadMenuButton = deadMenu;
             resultRetryButton = resultRetry; resultMenuButton = resultMenu;
             Bind();
         }
         private void OnEnable()
         {
+            EnsureGraftPresentation();
             Bind();
+        }
+
+        private void EnsureGraftPresentation()
+        {
+            if (graftPanel == null || rootButton == null || stemButton == null || flowerButton == null || closeGraftButton == null) return;
+            graftPresentation = GraftPanelPresentation.Ensure(graftPanel, rootButton, stemButton, flowerButton, closeGraftButton) ?? graftPresentation;
         }
         private void Bind()
         {
