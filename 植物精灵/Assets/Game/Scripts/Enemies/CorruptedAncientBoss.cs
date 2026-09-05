@@ -10,13 +10,24 @@ namespace PlantSpirit.GGJ
         private float health = 150f;
         private float nextAttack;
         private int attackIndex;
+        private bool battleActive;
         public event Action Defeated;
 
-        public void Configure(Transform target) => player = target;
+        public void Configure(Transform target, bool startActive = true)
+        {
+            player = target;
+            battleActive = startActive;
+        }
+
+        public void BeginBattle()
+        {
+            battleActive = true;
+            nextAttack = Time.time + .7f;
+        }
 
         private void Update()
         {
-            if (player == null || GameBootstrap.Instance == null || GameBootstrap.Instance.State.Current != GameState.Playing) return;
+            if (!battleActive || player == null || GameBootstrap.Instance == null || GameBootstrap.Instance.State.Current != GameState.Playing) return;
             if (Time.time < nextAttack) return;
             nextAttack = Time.time + 2.5f;
             int phase = attackIndex++ % 3;
@@ -89,10 +100,17 @@ namespace PlantSpirit.GGJ
 
     public sealed class HealingShrine : MonoBehaviour
     {
+        private bool activated;
+
         private void OnTriggerEnter2D(Collider2D other)
         {
+            if (activated) return;
             PlayerHealth health = other.GetComponent<PlayerHealth>();
-            if (health != null) health.RestoreFull();
+            if (health == null) return;
+            health.RestoreFull();
+            activated = true;
+            SpriteRenderer visual = GetComponent<SpriteRenderer>();
+            if (visual != null) visual.color = new Color(.24f, .62f, .42f, 1f);
         }
     }
 }
