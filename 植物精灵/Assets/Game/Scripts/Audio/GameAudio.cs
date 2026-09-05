@@ -92,14 +92,44 @@ namespace PlantSpirit.GGJ
             { AudioCue.PortalGrow, "portal_grow" }
         };
 
+        // The source clips have very different transient shapes. Per-cue gains keep
+        // quiet cues audible without making the already-loud cues clip when layered.
+        private static readonly Dictionary<AudioCue, float> CueGains = new Dictionary<AudioCue, float>
+        {
+            { AudioCue.UiClick, .8f },
+            { AudioCue.PlayerJump, 1.1f },
+            { AudioCue.PlayerAttackSwing, 1f },
+            { AudioCue.PlayerAttackHit, 1.2f },
+            { AudioCue.PlayerHurt, .72f },
+            { AudioCue.PlayerDeath, .5f },
+            { AudioCue.PlayerPickup, 1f },
+            { AudioCue.GraftConfirm, .75f },
+            { AudioCue.PoisonCast, 1.15f },
+            { AudioCue.VineSwing, 1.1f },
+            { AudioCue.EnemyVineTelegraph, .72f },
+            { AudioCue.EnemyMushroomShoot, .9f },
+            { AudioCue.EnemyBeetleCharge, 1f },
+            { AudioCue.EnemyHurt, 1.15f },
+            { AudioCue.PortalGrow, 3.2f }
+        };
+
         public static GameAudio Instance { get; private set; }
-        public static bool Ready => Instance != null && Instance.sfx.Count > 0;
+        public static bool Ready => Instance != null && Instance.sfx.Count == CueNames.Count;
+        public static bool MusicReady => Instance != null && Instance.menuMusic != null && Instance.levelMusic != null;
         public bool MixerSettingsApplied { get; private set; }
+        public bool IsMusicPlaying => musicSource != null && musicSource.isPlaying;
+        public bool HasAudioListener => FindObjectOfType<AudioListener>() != null;
+        public string CurrentMusicClipName => musicSource != null && musicSource.clip != null ? musicSource.clip.name : string.Empty;
 
         private readonly Dictionary<AudioCue, AudioClip> sfx = new Dictionary<AudioCue, AudioClip>();
+        private readonly Dictionary<AudioCue, float> lastPlayedAt = new Dictionary<AudioCue, float>();
         private AudioMixer mixer;
+        private AudioMixerGroup musicGroup;
+        private AudioMixerGroup sfxGroup;
         private AudioSource musicSource;
         private AudioSource sfxSource;
+        private AudioClip menuMusic;
+        private AudioClip levelMusic;
 
         public static GameAudio Ensure()
         {
@@ -123,9 +153,12 @@ namespace PlantSpirit.GGJ
         private void Awake()
         {
             if (Instance != null && Instance != this) { Destroy(gameObject); return; }
+            Debug.Log("[PlantSpiritAudio] Initializing audio service.");
             Instance = this;
             DontDestroyOnLoad(gameObject);
+            EnsureAudioListener();
             LoadResources();
+            Debug.Log("[PlantSpiritAudio] Audio resources loaded: " + sfx.Count + " SFX, menu=" + (menuMusic != null) + ", level=" + (levelMusic != null) + ".");
             GameAudioSettings.Changed += ApplySettings;
             SceneManager.sceneLoaded += OnSceneLoaded;
             ApplySettings();
@@ -144,6 +177,7 @@ namespace PlantSpirit.GGJ
 
         private void LoadResources()
         {
+            Debug.Log("[PlantSpiritAudio] Loading mixer.");
             mixer = Resources.Load<AudioMixer>(MixerResource);
             musicSource = CreateSource(true);
             sfxSource = CreateSource(false);
@@ -152,15 +186,32 @@ namespace PlantSpirit.GGJ
             {
                 AudioMixerGroup[] musicGroups = mixer.FindMatchingGroups("Music");
                 AudioMixerGroup[] sfxGroups = mixer.FindMatchingGroups("SFX");
-                if (musicGroups.Length > 0) musicSource.outputAudioMixerGroup = musicGroups[0];
-                if (sfxGroups.Length > 0) sfxSource.outputAudioMixerGroup = sfxGroups[0];
+                if (musicGroups.Length > 0) musicGroup = musicGroups[0];
+                if (sfxGroups.Length > 0) sfxGroup = sfxGroups[0];
             }
 
+            Debug.Log("[PlantSpiritAudio] Loading music clips.");
+            menuMusic = Resources.Load<AudioClip>(MenuMusicResource);
+            levelMusic = Resources.Load<AudioClip>(LevelMusicResource);
+
+            Debug.Log("[PlantSpiritAudio] Loading SFX clips.");
             AudioClip[] clips = Resources.LoadAll<AudioClip>(SfxResource);
             var clipsByName = new Dictionary<string, AudioClip>(StringComparer.OrdinalIgnoreCase);
             foreach (AudioClip clip in clips) clipsByName[clip.name] = clip;
             foreach (KeyValuePair<AudioCue, string> cue in CueNames)
                 if (clipsByName.TryGetValue(cue.Value, out AudioClip clip)) sfx[cue.Key] = clip;
+
+            if (menuMusic == null) Debug.LogError("Missing menu music at Resources/" + MenuMusicResource + ".");
+            if (levelMusic == null) Debug.LogError("Missing level music at Resources/" + LevelMusicResource + ".");
+            foreach (KeyValuePair<AudioCue, string> cue in CueNames)
+                if (!sfx.ContainsKey(cue.Key)) Debug.LogError("Missing audio cue at Resources/" + SfxResource + "/" + cue.Value + ".");
+        }
+
+        private void EnsureAudioListener()
+        {
+            if (FindObjectOfType<AudioListener>() != null) return;
+            gameObject.AddComponent<AudioListener>();
+            Debug.Log("[PlantSpiritAudio] No scene AudioListener was found; attached a persistent listener to GameAudio.");
         }
 
         private AudioSource CreateSource(bool loop)
@@ -169,6 +220,7 @@ namespace PlantSpirit.GGJ
             source.playOnAwake = false;
             source.loop = loop;
             source.spatialBlend = 0f;
+            source.priority = loop ? 96 : 64;
             return source;
         }
 
@@ -179,16 +231,24 @@ namespace PlantSpirit.GGJ
             float effects = GameAudioSettings.Get(AudioChannel.Sfx);
             if (mixer != null)
             {
-                AudioListener.volume = 1f;
                 bool masterApplied = mixer.SetFloat("MasterVolume", GameAudioSettings.ToDecibels(master));
                 bool musicApplied = mixer.SetFloat("MusicVolume", GameAudioSettings.ToDecibels(music));
                 bool sfxApplied = mixer.SetFloat("SfxVolume", GameAudioSettings.ToDecibels(effects));
                 MixerSettingsApplied = masterApplied && musicApplied && sfxApplied;
-                musicSource.volume = 1f;
-                sfxSource.volume = 1f;
-                return;
+                if (MixerSettingsApplied)
+                {
+                    musicSource.outputAudioMixerGroup = musicGroup;
+                    sfxSource.outputAudioMixerGroup = sfxGroup;
+                    AudioListener.volume = 1f;
+                    musicSource.volume = 1f;
+                    sfxSource.volume = 1f;
+                    return;
+                }
             }
 
+            // A malformed or unavailable mixer must not make the sliders ineffective.
+            musicSource.outputAudioMixerGroup = null;
+            sfxSource.outputAudioMixerGroup = null;
             MixerSettingsApplied = false;
             AudioListener.volume = master;
             musicSource.volume = music;
@@ -197,7 +257,12 @@ namespace PlantSpirit.GGJ
 
         private void PlayInternal(AudioCue cue)
         {
-            if (sfxSource != null && sfx.TryGetValue(cue, out AudioClip clip)) sfxSource.PlayOneShot(clip);
+            if (sfxSource == null || !sfx.TryGetValue(cue, out AudioClip clip)) return;
+            float now = Time.unscaledTime;
+            if (lastPlayedAt.TryGetValue(cue, out float previous) && now - previous < .035f) return;
+            lastPlayedAt[cue] = now;
+            float gain = CueGains.TryGetValue(cue, out float configuredGain) ? configuredGain : 1f;
+            sfxSource.PlayOneShot(clip, gain);
         }
 
         private void OnSceneLoaded(Scene scene, LoadSceneMode mode) => PlayMusicForScene(scene.name);
@@ -205,8 +270,7 @@ namespace PlantSpirit.GGJ
         private void PlayMusicForScene(string sceneName)
         {
             if (musicSource == null) return;
-            string resource = sceneName == "MainMenu" ? MenuMusicResource : sceneName == "Level01" ? LevelMusicResource : string.Empty;
-            AudioClip next = string.IsNullOrEmpty(resource) ? null : Resources.Load<AudioClip>(resource);
+            AudioClip next = sceneName == "MainMenu" ? menuMusic : sceneName == "Level01" ? levelMusic : null;
             if (musicSource.clip == next) return;
             musicSource.Stop();
             musicSource.clip = next;

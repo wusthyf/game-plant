@@ -15,7 +15,7 @@ namespace PlantSpirit.GGJ
             yield return null;
             MainMenuPresenter menu = FindObjectOfType<MainMenuPresenter>();
             AudioSettingsPanel audioSettings = FindObjectOfType<AudioSettingsPanel>();
-            if (!Require(menu != null && audioSettings != null && GameObject.Find("MenuArt") != null && GameAudio.Ready && GameAudio.Instance.MixerSettingsApplied && GameAudio.IsCueAvailable(AudioCue.UiClick), "Main menu, supplied art, or audio system missing")) yield break;
+            if (!Require(menu != null && audioSettings != null && GameObject.Find("MenuArt") != null && GameAudio.Ready && GameAudio.MusicReady && GameAudio.Instance.HasAudioListener && GameAudio.Instance.IsMusicPlaying && GameAudio.Instance.CurrentMusicClipName == "menu_music" && GameAudio.Instance.MixerSettingsApplied && GameAudio.IsCueAvailable(AudioCue.UiClick), "Main menu, supplied art, listener, music, or audio system missing")) yield break;
             menu.ToggleAudio();
             yield return null;
             if (!Require(audioSettings.IsOpen, "Audio settings panel did not open")) yield break;
@@ -27,6 +27,7 @@ namespace PlantSpirit.GGJ
             float deadline = Time.realtimeSinceStartup + 8f;
             while ((SceneManager.GetActiveScene().name != "Level01" || GameBootstrap.Instance.State.Current != GameState.Playing) && Time.realtimeSinceStartup < deadline) yield return null;
             if (!Require(SceneManager.GetActiveScene().name == "Level01", "Level01 did not load")) yield break;
+            if (!Require(GameAudio.Instance.IsMusicPlaying && GameAudio.Instance.CurrentMusicClipName == "level_music", "Level music did not start")) yield break;
 
             LevelFlow flow = FindObjectOfType<LevelFlow>();
             PlayerMotor2D player = FindObjectOfType<PlayerMotor2D>();

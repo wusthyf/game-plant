@@ -30,7 +30,13 @@ namespace PlantSpirit.GGJ
             quitButton?.onClick.AddListener(QuitGame);
         }
 
-        private void Start() => MenuArtDecorator.Ensure();
+        private void Start()
+        {
+            if (!MainMenuVisualTheme.Ensure(startButton, controlsButton, audioButton, quitButton))
+            {
+                MenuArtDecorator.Ensure();
+            }
+        }
 
         private void OnDisable()
         {

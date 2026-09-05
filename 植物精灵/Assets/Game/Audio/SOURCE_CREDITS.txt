@@ -23,3 +23,11 @@ portal_grow.wav, ui_click.wav
 portal_grow.wav 由 CC0 法术音效片段组合为约 3~5 秒的传送门生长音。
 
 本项目音频素材确认可用于非商业 Game Jam 发布。
+
+【背景音乐】
+文件：menu_music.wav, level_music.wav
+作者：本项目原创程序作曲（确定性波形合成）
+来源：tools/generate_audio_assets.py
+许可证：项目自有，可随本项目商用与修改
+
+处理说明：两首音乐均为立体声、48 kHz、16-bit PCM WAV，首尾过零并按整小节设计，可无爆音循环播放；Unity 导入为 Vorbis Compressed In Memory。

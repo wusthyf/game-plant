@@ -10,12 +10,14 @@ namespace PlantSpirit.GGJ.Editor
     {
         public const string MixerPath = "Assets/Game/Audio/Resources/PlantSpirit/Audio/PlantSpiritAudioMixer.mixer";
         private const string SfxPath = "Assets/Game/Audio/Resources/PlantSpirit/Audio/SFX";
+        private const string MusicPath = "Assets/Game/Audio/Resources/PlantSpirit/Audio/Music";
 
         [MenuItem("Plant Spirit/Prepare Audio Assets")]
         public static void Build()
         {
             AssetDatabase.Refresh();
             ConfigureSfxImporters();
+            ConfigureMusicImporters();
             EnsureMixer();
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
@@ -141,6 +143,34 @@ namespace PlantSpirit.GGJ.Editor
                 settings.loadType = AudioClipLoadType.DecompressOnLoad;
                 settings.compressionFormat = AudioCompressionFormat.PCM;
                 settings.sampleRateSetting = AudioSampleRateSetting.PreserveSampleRate;
+                settings.preloadAudioData = true;
+                importer.defaultSampleSettings = settings;
+                importer.SaveAndReimport();
+            }
+        }
+
+        private static void ConfigureMusicImporters()
+        {
+            string[] clips = AssetDatabase.FindAssets("t:AudioClip", new[] { MusicPath });
+            foreach (string guid in clips)
+            {
+                string path = AssetDatabase.GUIDToAssetPath(guid);
+                AudioImporter importer = AssetImporter.GetAtPath(path) as AudioImporter;
+                if (importer == null) continue;
+                AudioImporterSampleSettings settings = importer.defaultSampleSettings;
+                bool changed = importer.forceToMono || !settings.preloadAudioData || importer.loadInBackground ||
+                    settings.loadType != AudioClipLoadType.CompressedInMemory ||
+                    settings.compressionFormat != AudioCompressionFormat.Vorbis ||
+                    !Mathf.Approximately(settings.quality, .7f);
+                if (!changed) continue;
+                importer.forceToMono = false;
+                importer.loadInBackground = false;
+                // Resources.Load during bootstrap must complete before the first frame.
+                // CompressedInMemory avoids the startup stall seen with Streaming clips
+                // packed into resources.assets while retaining Vorbis compression.
+                settings.loadType = AudioClipLoadType.CompressedInMemory;
+                settings.compressionFormat = AudioCompressionFormat.Vorbis;
+                settings.quality = .7f;
                 settings.preloadAudioData = true;
                 importer.defaultSampleSettings = settings;
                 importer.SaveAndReimport();

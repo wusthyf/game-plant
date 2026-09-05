@@ -175,6 +175,22 @@ namespace PlantSpirit.GGJ.Tests
             SerializedProperty views = new SerializedObject(mixer).FindProperty("m_AudioMixerGroupViews");
             Assert.That(views.arraySize, Is.EqualTo(1));
             Assert.That(views.GetArrayElementAtIndex(0).FindPropertyRelative("guids").arraySize, Is.EqualTo(3));
+
+            const string musicRoot = "Assets/Game/Audio/Resources/PlantSpirit/Audio/Music";
+            string[] musicClips = AssetDatabase.FindAssets("t:AudioClip", new[] { musicRoot });
+            Assert.That(musicClips.Length, Is.EqualTo(2));
+            foreach (string guid in musicClips)
+            {
+                AudioClip clip = AssetDatabase.LoadAssetAtPath<AudioClip>(AssetDatabase.GUIDToAssetPath(guid));
+                AudioImporter importer = AssetImporter.GetAtPath(AssetDatabase.GUIDToAssetPath(guid)) as AudioImporter;
+                Assert.That(clip, Is.Not.Null);
+                Assert.That(clip.channels, Is.EqualTo(2));
+                Assert.That(clip.length, Is.GreaterThan(20f));
+                Assert.That(importer.forceToMono, Is.False);
+                Assert.That(importer.defaultSampleSettings.preloadAudioData, Is.True);
+                Assert.That(importer.defaultSampleSettings.loadType, Is.EqualTo(AudioClipLoadType.CompressedInMemory));
+                Assert.That(importer.defaultSampleSettings.compressionFormat, Is.EqualTo(AudioCompressionFormat.Vorbis));
+            }
         }
 
         [Test]
