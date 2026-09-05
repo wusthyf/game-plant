@@ -26,8 +26,10 @@ namespace PlantSpirit.GGJ
         protected float cooldown;
         protected float minX = float.NegativeInfinity;
         protected float maxX = float.PositiveInfinity;
+        private const int TerrainLayerMask = 1 << 8;
         private const float ContactDamageInterval = .9f;
         private float nextContactDamageTime;
+        private Collider2D collisionShape;
         private SpriteRenderer visual;
         private Color baseColor;
 
@@ -35,6 +37,7 @@ namespace PlantSpirit.GGJ
         {
             CurrentHealth = maxHealth;
             body = GetComponent<Rigidbody2D>();
+            collisionShape = GetComponent<Collider2D>();
             status = GetComponent<StatusController>();
             visual = GetComponent<SpriteRenderer>();
             if (visual != null) baseColor = visual.color;
@@ -69,7 +72,15 @@ namespace PlantSpirit.GGJ
             float modifier = 1f - (status == null ? 0f : status.SlowPercent);
             float velocity = Mathf.Sign(target.position.x - transform.position.x) * speed * modifier;
             if ((transform.position.x <= minX && velocity < 0f) || (transform.position.x >= maxX && velocity > 0f)) velocity = 0f;
-            if (body != null) body.velocity = new Vector2(velocity, body.velocity.y);
+            if (body != null)
+            {
+                float horizontalDistance = Mathf.Abs(target.position.x - transform.position.x);
+                bool targetIsAbove = target.position.y > transform.position.y + .65f;
+                bool grounded = collisionShape != null && collisionShape.IsTouchingLayers(TerrainLayerMask);
+                if (grounded && targetIsAbove && horizontalDistance < 2.5f)
+                    body.velocity = new Vector2(velocity, 8.5f);
+                else body.velocity = new Vector2(velocity, body.velocity.y);
+            }
             else transform.position += Vector3.right * velocity * Time.deltaTime;
         }
         protected IEnumerator AttackSequence(float startup, float recovery)
@@ -189,7 +200,9 @@ namespace PlantSpirit.GGJ
                 else transform.position += Vector3.right * chargeDirection * 8f * Time.deltaTime;
                 return;
             }
-            if (cooldown <= 0f && Mathf.Abs(target.position.x - transform.position.x) < 6f) StartCoroutine(Charge());
+            bool targetIsAbove = target.position.y > transform.position.y + .65f;
+            if (targetIsAbove && Mathf.Abs(target.position.x - transform.position.x) < 2.5f) MoveTowardTarget();
+            else if (cooldown <= 0f && Mathf.Abs(target.position.x - transform.position.x) < 6f) StartCoroutine(Charge());
             else MoveTowardTarget();
         }
         private IEnumerator Charge()

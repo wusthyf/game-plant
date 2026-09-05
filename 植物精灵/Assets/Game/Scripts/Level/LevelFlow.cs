@@ -1,5 +1,6 @@
 using System.Collections;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace PlantSpirit.GGJ
 {
@@ -10,6 +11,7 @@ namespace PlantSpirit.GGJ
         [SerializeField] private ExitPortal portal;
         private int activeIndex;
         private bool bossStarted;
+        private bool isBossArena;
 
         public int ActiveEncounter => activeIndex;
         public int ActiveRemaining => encounters != null && activeIndex >= 0 && activeIndex < encounters.Length ? encounters[activeIndex].Remaining : 0;
@@ -19,7 +21,16 @@ namespace PlantSpirit.GGJ
         private void Start()
         {
             if (GameBootstrap.Instance == null) new GameObject("GameBootstrap").AddComponent<GameBootstrap>();
+            isBossArena = SceneManager.GetActiveScene().name == "BossArena";
             LevelArtDecorator.Ensure();
+            if (isBossArena)
+            {
+                for (int i = 0; i < encounters.Length; i++) encounters[i].gameObject.SetActive(false);
+                portal?.gameObject.SetActive(false);
+                GameBootstrap.Instance.ContinueRun();
+                StartBoss();
+                return;
+            }
             for (int i = 0; i < encounters.Length; i++) encounters[i].Cleared += OnEncounterCleared;
             for (int i = 1; i < encounters.Length; i++) encounters[i].gameObject.SetActive(false);
             GameObject.Find("Gate02")?.SetActive(false);
@@ -44,8 +55,14 @@ namespace PlantSpirit.GGJ
         {
             if (encounter.Order != activeIndex) return;
             activeIndex++;
-            if (activeIndex >= 1) StartBoss();
+            if (activeIndex >= 1) OpenBossPortal();
             else encounters[activeIndex].UnlockEntry();
+        }
+
+        private void OpenBossPortal()
+        {
+            portal?.ConfigureDestination("BossArena");
+            portal?.BeginOpen();
         }
 
         private void StartBoss()
@@ -53,7 +70,9 @@ namespace PlantSpirit.GGJ
             if (bossStarted) return;
             bossStarted = true;
             GameAudio.PlayBossMusic();
-            Vector3 point = portal == null ? Vector3.zero : portal.transform.position + Vector3.left * 3f;
+            PlayerMotor2D player = FindObjectOfType<PlayerMotor2D>();
+            if (isBossArena && player != null) player.transform.position = new Vector3(-5f, -3.1f, 0f);
+            Vector3 point = isBossArena ? new Vector3(4f, -2.9f, 0f) : portal == null ? Vector3.zero : portal.transform.position + Vector3.left * 3f;
             GameObject shrine = new GameObject("HealingShrine"); shrine.transform.position = point + Vector3.left * 2f;
             shrine.AddComponent<PlaceholderVisual>().Configure(new Color(.35f, 1f, .62f), new Vector2(.7f, 1.1f), 3);
             BoxCollider2D shrineCollider = shrine.AddComponent<BoxCollider2D>(); shrineCollider.isTrigger = true;
@@ -62,7 +81,7 @@ namespace PlantSpirit.GGJ
             boss.AddComponent<PlaceholderVisual>().Configure(new Color(.2f, .3f, .12f), new Vector2(2.4f, 3.1f), 3);
             boss.AddComponent<BoxCollider2D>(); Hurtbox2D hurtbox = boss.AddComponent<Hurtbox2D>();
             CorruptedAncientBoss controller = boss.AddComponent<CorruptedAncientBoss>(); hurtbox.Receiver = controller;
-            controller.Configure(FindObjectOfType<PlayerMotor2D>()?.transform);
+            controller.Configure(player?.transform);
             controller.Defeated += () => StartCoroutine(OpenPortal());
         }
 

@@ -9,6 +9,7 @@ namespace PlantSpirit.GGJ
         private bool entering;
         private PlayerMotor2D playerInside;
         private InputReader input;
+        private string destinationScene;
 
         public bool IsOpen => open;
         public bool IsEntering => entering;
@@ -33,6 +34,11 @@ namespace PlantSpirit.GGJ
             GameAudio.Play(AudioCue.PortalGrow);
         }
 
+        public void ConfigureDestination(string sceneName)
+        {
+            destinationScene = sceneName;
+        }
+
         public void TryEnter()
         {
             if (!open || playerInside == null || entering || GameBootstrap.Instance == null || GameBootstrap.Instance.State.Current != GameState.Playing) return;
@@ -46,7 +52,9 @@ namespace PlantSpirit.GGJ
         private IEnumerator Enter()
         {
             yield return new WaitForSeconds(.6f);
-            if (GameBootstrap.Instance != null) GameBootstrap.Instance.FinishRun();
+            if (GameBootstrap.Instance == null) yield break;
+            if (string.IsNullOrEmpty(destinationScene)) GameBootstrap.Instance.FinishRun();
+            else GameBootstrap.Instance.LoadLevel(destinationScene);
         }
 
         private void OnTriggerEnter2D(Collider2D other)

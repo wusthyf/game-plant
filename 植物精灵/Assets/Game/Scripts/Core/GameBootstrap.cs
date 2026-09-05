@@ -38,7 +38,12 @@ namespace PlantSpirit.GGJ
 
         public void StartLevel()
         {
-            BeginLoad("Level01");
+            LoadLevel("Level01");
+        }
+
+        public void LoadLevel(string sceneName)
+        {
+            if (!string.IsNullOrEmpty(sceneName)) BeginLoad(sceneName);
         }
 
         public void ReturnToMenu()
@@ -65,6 +70,12 @@ namespace PlantSpirit.GGJ
         {
             loading = false;
             Session.BeginRun();
+            State.SetState(GameState.Playing);
+        }
+
+        public void ContinueRun()
+        {
+            loading = false;
             State.SetState(GameState.Playing);
         }
 
