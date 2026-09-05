@@ -84,7 +84,36 @@ namespace PlantSpirit.GGJ.Editor
         { GameObject go=new GameObject(name); go.transform.position=center; BoxCollider2D box=go.AddComponent<BoxCollider2D>(); box.isTrigger=true; box.size=new Vector2(7.5f,4.2f); Transform[] spots=new Transform[kinds.Length]; for(int i=0;i<spots.Length;i++){GameObject spot=new GameObject(name+"Spawn"+i);spot.transform.position=center+new Vector2(1+i*1.3f,-.7f);spots[i]=spot.transform;} EncounterZone zone=go.AddComponent<EncounterZone>(); zone.Configure(id,player,inv,reward,kinds,spots);return zone; }
         private static ExitPortal Portal(Vector2 pos){GameObject go=new GameObject("ExitPortal");go.layer=14;go.transform.position=pos;go.AddComponent<PlaceholderVisual>().Configure(new Color(.2f,.95f,.65f),new Vector2(1.1f,1.6f),2);BoxCollider2D c=go.AddComponent<BoxCollider2D>();c.isTrigger=true;c.size=Vector2.one;return go.AddComponent<ExitPortal>();}
         private static GameObject Gate(Vector2 pos,string name){GameObject go=new GameObject(name);go.layer=8;go.transform.position=pos;go.AddComponent<PlaceholderVisual>().Configure(new Color(.55f,.18f,.14f),new Vector2(.35f,3.2f),3);BoxCollider2D c=go.AddComponent<BoxCollider2D>();c.size=Vector2.one;return go;}
-        private static void Ui(InputReader input,PlayerHealth health,GraftApplier applier,ExitPortal portal){Canvas c=Canvas("GameCanvas");Text h=Label(c.transform,"",new Vector2(-360,245),22);h.alignment=TextAnchor.MiddleLeft;ConfigureHudRect(h.rectTransform);Text interaction=Label(c.transform,"按 E 进入传送门",new Vector2(0,-250),24);ConfigureInteractionRect(interaction.rectTransform);interaction.gameObject.SetActive(false);GameObject graft=Panel(c.transform,"",new Color(.1f,.25f,.18f,.92f));GameObject pause=Panel(c.transform,"已暂停",new Color(.1f,.1f,.15f,.92f));GameObject dead=Panel(c.transform,"",new Color(.25f,.08f,.08f,.92f));GameObject result=Panel(c.transform,"",new Color(.08f,.25f,.15f,.92f));graft.SetActive(false);pause.SetActive(false);dead.SetActive(false);result.SetActive(false);GameUiController ui=c.gameObject.AddComponent<GameUiController>();ui.Configure(graft,pause,dead,result,h,graft.GetComponentInChildren<Text>(),dead.GetComponentInChildren<Text>(),result.GetComponentInChildren<Text>(),interaction,health,applier,input,portal);Button root=Button(graft.transform,"根",new Vector2(-190,-72));Button stem=Button(graft.transform,"茎",new Vector2(0,-72));Button flower=Button(graft.transform,"花",new Vector2(190,-72));Button close=Button(graft.transform,"关闭",new Vector2(0,-142));Button resume=Button(pause.transform,"继续",new Vector2(-130,-68));Button pauseMenu=Button(pause.transform,"主菜单",new Vector2(130,-68));Button deadRestart=Button(dead.transform,"重新开始",new Vector2(-130,-88));Button deadMenu=Button(dead.transform,"主菜单",new Vector2(130,-88));Button retry=Button(result.transform,"再次挑战",new Vector2(-130,-120));Button resultMenu=Button(result.transform,"主菜单",new Vector2(130,-120));ui.ConfigureButtons(root,stem,flower,close,resume,pauseMenu,deadRestart,deadMenu,retry,resultMenu);}
+        private static void Ui(InputReader input, PlayerHealth health, GraftApplier applier, ExitPortal portal)
+        {
+            Canvas canvas = Canvas("GameCanvas");
+            Text hud = Label(canvas.transform, "", new Vector2(-360, 245), 22);
+            hud.alignment = TextAnchor.MiddleLeft;
+            ConfigureHudRect(hud.rectTransform);
+            Text interaction = Label(canvas.transform, "按 E 进入传送门", new Vector2(0, -250), 24);
+            ConfigureInteractionRect(interaction.rectTransform);
+            interaction.gameObject.SetActive(false);
+
+            GameObject graft = Panel(canvas.transform, "", new Color(.1f, .25f, .18f, .92f));
+            GameObject pause = Panel(canvas.transform, "已暂停", new Color(.1f, .1f, .15f, .92f));
+            GameObject dead = Panel(canvas.transform, "", new Color(.25f, .08f, .08f, .92f));
+            GameObject result = Panel(canvas.transform, "", new Color(.08f, .25f, .15f, .92f));
+            graft.SetActive(false); pause.SetActive(false); dead.SetActive(false); result.SetActive(false);
+
+            Button root = Button(graft.transform, "根", new Vector2(-190, -72));
+            Button stem = Button(graft.transform, "茎", new Vector2(0, -72));
+            Button flower = Button(graft.transform, "花", new Vector2(190, -72));
+            Button close = Button(graft.transform, "关闭", new Vector2(0, -142));
+            GameUiController ui = canvas.gameObject.AddComponent<GameUiController>();
+            ui.Configure(graft, pause, dead, result, hud, graft.GetComponentInChildren<Text>(), dead.GetComponentInChildren<Text>(), result.GetComponentInChildren<Text>(), interaction, health, applier, input, portal);
+            Button resume = Button(pause.transform, "继续", new Vector2(-130, -68));
+            Button pauseMenu = Button(pause.transform, "主菜单", new Vector2(130, -68));
+            Button deadRestart = Button(dead.transform, "重新开始", new Vector2(-130, -88));
+            Button deadMenu = Button(dead.transform, "主菜单", new Vector2(130, -88));
+            Button retry = Button(result.transform, "再次挑战", new Vector2(-130, -120));
+            Button resultMenu = Button(result.transform, "主菜单", new Vector2(130, -120));
+            ui.ConfigureButtons(root, stem, flower, close, resume, pauseMenu, deadRestart, deadMenu, retry, resultMenu);
+        }
         private static Canvas Canvas(string n){GameObject go=new GameObject(n);Canvas c=go.AddComponent<Canvas>();c.renderMode=RenderMode.ScreenSpaceOverlay;CanvasScaler sc=go.AddComponent<CanvasScaler>();ConfigureCanvasScaler(sc);go.AddComponent<GraphicRaycaster>();return c;}
         private static GameObject Panel(Transform p,string text,Color color){GameObject go=new GameObject(text.Length==0?"Panel":text);go.transform.SetParent(p,false);Image i=go.AddComponent<Image>();i.color=color;RectTransform r=i.rectTransform;r.anchorMin=r.anchorMax=new Vector2(.5f,.5f);r.sizeDelta=new Vector2(720,420);Text label=Label(go.transform,text,new Vector2(0,55),26);label.rectTransform.sizeDelta=new Vector2(650,230);return go;}
         private static Text Label(Transform p,string text,Vector2 pos,int size){GameObject go=new GameObject(text.Length==0?"Label":text);go.transform.SetParent(p,false);Text t=go.AddComponent<Text>();t.font=Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");t.text=text;t.fontSize=size;t.color=Color.white;t.alignment=TextAnchor.MiddleCenter;RectTransform r=t.rectTransform;r.anchorMin=r.anchorMax=new Vector2(.5f,.5f);r.anchoredPosition=pos;r.sizeDelta=new Vector2(1300,100);return t;}

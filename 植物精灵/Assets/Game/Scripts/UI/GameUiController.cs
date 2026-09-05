@@ -12,6 +12,7 @@ namespace PlantSpirit.GGJ
         [SerializeField] private GameObject resultPanel;
         [SerializeField] private Text hud;
         [SerializeField] private Text graftText;
+        [SerializeField] private GraftPanelPresentation graftPresentation;
         [SerializeField] private Text resultText;
         [SerializeField] private Text deadText;
         [SerializeField] private Text interactionText;
@@ -33,11 +34,12 @@ namespace PlantSpirit.GGJ
         private bool bound;
         private Coroutine deadRevealRoutine;
         public void Configure(GameObject graft, GameObject pause, GameObject dead, GameObject result, Text hudText, Text graftPanelText, Text deadPanelText, Text resultPanelText, Text interactionPrompt, PlayerHealth playerHealth, GraftApplier graftApplier, InputReader reader, ExitPortal exitPortal)
-        { Unbind(); graftPanel = graft; pausePanel = pause; deadPanel = dead; resultPanel = result; hud = hudText; graftText = graftPanelText; deadText = deadPanelText; resultText = resultPanelText; interactionText = interactionPrompt; health = playerHealth; applier = graftApplier; input = reader; portal = exitPortal; Bind(); }
+        { Unbind(); graftPanel = graft; pausePanel = pause; deadPanel = dead; resultPanel = result; hud = hudText; graftText = graftPanelText; graftPresentation = graft == null ? null : graft.GetComponent<GraftPanelPresentation>(); deadText = deadPanelText; resultText = resultPanelText; interactionText = interactionPrompt; health = playerHealth; applier = graftApplier; input = reader; portal = exitPortal; Bind(); }
         public void ConfigureButtons(Button root, Button stem, Button flower, Button closeGraft, Button resume, Button pauseMenu, Button deadRestart, Button deadMenu, Button resultRetry, Button resultMenu)
         {
             Unbind();
             rootButton = root; stemButton = stem; flowerButton = flower; closeGraftButton = closeGraft;
+            graftPresentation = GraftPanelPresentation.Ensure(graftPanel, rootButton, stemButton, flowerButton, closeGraftButton) ?? graftPresentation;
             resumeButton = resume; pauseMenuButton = pauseMenu; deadRestartButton = deadRestart; deadMenuButton = deadMenu;
             resultRetryButton = resultRetry; resultMenuButton = resultMenu;
             Bind();
@@ -132,6 +134,9 @@ namespace PlantSpirit.GGJ
         {
             if (graftText == null || GameBootstrap.Instance == null) return;
             var session = GameBootstrap.Instance.Session;
+            if (graftPresentation == null && graftPanel != null) graftPresentation = graftPanel.GetComponent<GraftPanelPresentation>();
+            graftPresentation?.Refresh(session);
+            graftText.enabled = graftPresentation == null;
             string root = session.Get(GraftSlot.Root)?.DisplayName ?? "空";
             string stem = session.Get(GraftSlot.Stem)?.DisplayName ?? "空";
             string flower = session.Get(GraftSlot.Flower)?.DisplayName ?? "空";
