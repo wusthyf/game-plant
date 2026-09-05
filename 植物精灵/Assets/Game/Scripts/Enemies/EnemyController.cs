@@ -26,6 +26,8 @@ namespace PlantSpirit.GGJ
         protected float cooldown;
         protected float minX = float.NegativeInfinity;
         protected float maxX = float.PositiveInfinity;
+        private const float ContactDamageInterval = .9f;
+        private float nextContactDamageTime;
         private SpriteRenderer visual;
         private Color baseColor;
 
@@ -118,6 +120,23 @@ namespace PlantSpirit.GGJ
         {
             if (kind == EnemyKind.Vine) GameAudio.Play(AudioCue.EnemyVineTelegraph);
             AttackStarted?.Invoke(this);
+        }
+
+        private void OnCollisionStay2D(Collision2D collision)
+        {
+            if (Dead || GameBootstrap.Instance == null || GameBootstrap.Instance.State.Current != GameState.Playing || Time.time < nextContactDamageTime) return;
+            Hurtbox2D hurtbox = collision.collider.GetComponentInParent<Hurtbox2D>();
+            if (hurtbox == null || hurtbox.GetComponentInParent<PlayerHealth>() == null) return;
+            nextContactDamageTime = Time.time + ContactDamageInterval;
+            Vector2 knockback = ((Vector2)hurtbox.transform.position - (Vector2)transform.position).normalized * 3.5f;
+            hurtbox.Receive(new DamageInfo
+            {
+                AttackInstanceId = GetInstanceID() ^ Time.frameCount,
+                Amount = damage,
+                Knockback = knockback,
+                Source = gameObject,
+                Type = DamageType.Physical
+            });
         }
     }
 
