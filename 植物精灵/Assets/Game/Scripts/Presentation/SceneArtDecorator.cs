@@ -21,6 +21,11 @@ namespace PlantSpirit.GGJ
 
         private void BuildBackground()
         {
+            if (StartingLandPresentation.IsStartingLand)
+            {
+                StartingLandPresentation.Build(transform);
+                return;
+            }
             int[] walls = { 43, 44, 45, 46, 57, 58, 65 };
             for (int i = 0; i < 13; i++)
             {
@@ -37,12 +42,13 @@ namespace PlantSpirit.GGJ
 
         private void BuildPlatforms()
         {
+            bool startingLand = StartingLandPresentation.IsStartingLand;
             GameObject ground = GameObject.Find("Ground");
             if (ground != null)
             {
                 ArtResources2D.HidePlaceholder(ground);
                 Collider2D collider = ground.GetComponent<Collider2D>();
-                Sprite tile = Ruin(1);
+                Sprite tile = startingLand ? StartingLandPresentation.Tile(1) : Ruin(1);
                 if (collider != null && tile != null)
                 {
                     float height = 1.15f;
@@ -55,10 +61,20 @@ namespace PlantSpirit.GGJ
                 }
             }
 
-            DecoratePlatform("TutorialPlatform", 13, .82f);
-            DecoratePlatform("CombatPlatform", 14, .78f);
-            DecoratePlatform("CombatPlatform02", 13, .82f);
-            DecoratePlatform("CombatPlatform03", 82, .88f);
+            if (startingLand)
+            {
+                DecoratePlatform("TutorialPlatform", StartingLandPresentation.Tile(40), .9f);
+                DecoratePlatform("CombatPlatform", StartingLandPresentation.Tile(13), .86f);
+                DecoratePlatform("CombatPlatform02", StartingLandPresentation.Tile(40), .9f);
+                DecoratePlatform("CombatPlatform03", StartingLandPresentation.Tile(1), 1.05f);
+            }
+            else
+            {
+                DecoratePlatform("TutorialPlatform", 13, .82f);
+                DecoratePlatform("CombatPlatform", 14, .78f);
+                DecoratePlatform("CombatPlatform02", 13, .82f);
+                DecoratePlatform("CombatPlatform03", 82, .88f);
+            }
             DecorateGate("Gate01", 66);
             DecorateGate("Gate02", 66);
         }
@@ -67,6 +83,12 @@ namespace PlantSpirit.GGJ
         {
             GameObject platform = GameObject.Find(objectName);
             Sprite sprite = Ruin(spriteIndex);
+            DecoratePlatform(objectName, sprite, height);
+        }
+
+        private void DecoratePlatform(string objectName, Sprite sprite, float height)
+        {
+            GameObject platform = GameObject.Find(objectName);
             if (platform == null || sprite == null) return;
             ArtResources2D.HidePlaceholder(platform);
             Collider2D collider = platform.GetComponent<Collider2D>();
@@ -119,6 +141,7 @@ namespace PlantSpirit.GGJ
 
         private void BuildProps()
         {
+            if (StartingLandPresentation.IsStartingLand) return;
             AddBottom("FlowerA", Ruin(6), new Vector2(-15.5f, -3.68f), .68f, 2);
             AddBottom("FlowerB", Ruin(8), new Vector2(-10.6f, -3.68f), .58f, 2);
             AddBottom("GrassA", Ruin(10), new Vector2(-4.8f, -3.68f), .48f, 2);

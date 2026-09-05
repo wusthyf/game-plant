@@ -1,0 +1,12 @@
+fileFormatVersion: 2
+guid: ccc40ce9d9c3409085f7759cf4c461b0
+TextureImporter:
+  serializedVersion: 13
+  mipmaps:
+    enableMipMap: 0
+  textureSettings:
+    filterMode: 0
+  spriteMode: 1
+  spritePixelsToUnits: 256
+  alphaIsTransparency: 1
+  textureType: 8
