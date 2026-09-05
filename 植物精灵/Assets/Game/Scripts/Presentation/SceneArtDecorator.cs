@@ -46,6 +46,7 @@ namespace PlantSpirit.GGJ
                 if (collider != null && tile != null)
                 {
                     float height = 1.15f;
+                    MatchColliderToArt(collider, height);
                     float scale = height / tile.bounds.size.y;
                     float width = tile.bounds.size.x * scale;
                     int count = Mathf.CeilToInt(collider.bounds.size.x / width) + 1;
@@ -58,6 +59,8 @@ namespace PlantSpirit.GGJ
             DecoratePlatform("CombatPlatform", 14, .78f);
             DecoratePlatform("CombatPlatform02", 13, .82f);
             DecoratePlatform("CombatPlatform03", 82, .88f);
+            DecorateGate("Gate01", 66);
+            DecorateGate("Gate02", 66);
         }
 
         private void DecoratePlatform(string objectName, int spriteIndex, float height)
@@ -68,6 +71,7 @@ namespace PlantSpirit.GGJ
             ArtResources2D.HidePlaceholder(platform);
             Collider2D collider = platform.GetComponent<Collider2D>();
             if (collider == null) return;
+            MatchColliderToArt(collider, height);
             SpriteRenderer renderer = AddBottom(objectName + "Art", sprite, new Vector2(collider.bounds.center.x, collider.bounds.max.y - height), height, 1);
             if (renderer != null)
             {
@@ -78,6 +82,39 @@ namespace PlantSpirit.GGJ
                 position.x = collider.bounds.center.x - sprite.bounds.center.x * scale.x;
                 renderer.transform.position = position;
             }
+        }
+
+        private void DecorateGate(string objectName, int spriteIndex)
+        {
+            GameObject gate = GameObject.Find(objectName);
+            Sprite sprite = Ruin(spriteIndex);
+            Collider2D collider = gate == null ? null : gate.GetComponent<Collider2D>();
+            if (gate == null || sprite == null || collider == null || gate.transform.Find("GateArt") != null) return;
+
+            ArtResources2D.HidePlaceholder(gate);
+            float height = collider.bounds.size.y;
+            SpriteRenderer renderer = ArtResources2D.CreateWorldSprite(gate.transform, "GateArt", sprite,
+                new Vector2(collider.bounds.center.x, collider.bounds.min.y), height, 2, new Color(.7f, .83f, .48f));
+            if (renderer == null) return;
+            Vector3 scale = renderer.transform.localScale;
+            float worldWidth = Mathf.Max(.45f, collider.bounds.size.x);
+            scale.x = worldWidth / Mathf.Max(.001f, sprite.bounds.size.x * Mathf.Abs(gate.transform.lossyScale.x));
+            renderer.transform.localScale = scale;
+            renderer.transform.position = new Vector3(collider.bounds.center.x - sprite.bounds.center.x * worldWidth,
+                renderer.transform.position.y, renderer.transform.position.z);
+        }
+
+        private static void MatchColliderToArt(Collider2D collider, float artHeight)
+        {
+            if (!(collider is BoxCollider2D box) || artHeight <= 0f) return;
+            float scaleY = Mathf.Abs(box.transform.lossyScale.y);
+            if (scaleY <= .001f) return;
+
+            // Keep the platform's walkable top where level design placed it while matching its drawn depth.
+            float top = box.bounds.max.y;
+            box.size = new Vector2(box.size.x, artHeight / scaleY);
+            box.offset = new Vector2(box.offset.x, (top - artHeight * .5f - box.transform.position.y) / scaleY);
+            Physics2D.SyncTransforms();
         }
 
         private void BuildProps()
