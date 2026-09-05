@@ -78,7 +78,24 @@ namespace PlantSpirit.GGJ
             Bounds bounds = GetComponent<Collider2D>().bounds;
             enemy.SetAllowedBounds(bounds.min.x + .45f, bounds.max.x - .45f);
             enemy.Died += OnEnemyDied;
+            enemy.Died += TrySpawnMonsterDrop;
             living.Add(enemy);
+        }
+
+        private void TrySpawnMonsterDrop(EnemyController enemy)
+        {
+            float chance = enemy.Kind == EnemyKind.Vine ? .45f : enemy.Kind == EnemyKind.Mushroom ? .35f : 0f;
+            if (chance <= 0f || UnityEngine.Random.value > chance || inventory == null) return;
+            GraftDefinition item = ScriptableObject.CreateInstance<GraftDefinition>();
+            item.Id = enemy.Kind == EnemyKind.Vine ? "vine_tendril" : "toxic_cap";
+            item.Slot = enemy.Kind == EnemyKind.Vine ? GraftSlot.Stem : GraftSlot.Flower;
+            item.DisplayName = enemy.Kind == EnemyKind.Vine ? "藤蔓触须" : "毒菌伞";
+            GameObject drop = new GameObject(item.DisplayName + " Drop");
+            drop.layer = 14;
+            drop.transform.position = enemy.transform.position;
+            drop.AddComponent<PlaceholderVisual>().Configure(new Color(.95f, .84f, .28f), Vector2.one * .42f, 5);
+            BoxCollider2D collider = drop.AddComponent<BoxCollider2D>(); collider.isTrigger = true;
+            drop.AddComponent<GraftPickup>().Configure(item, inventory);
         }
 
         private void OnTriggerEnter2D(Collider2D other)
