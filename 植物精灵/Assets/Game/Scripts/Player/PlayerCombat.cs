@@ -6,6 +6,7 @@ namespace PlantSpirit.GGJ
 {
     public sealed class PlayerCombat : MonoBehaviour
     {
+        public const float MeleeHitStopSeconds = .2f;
         [SerializeField] private PlayerMotor2D motor;
         [SerializeField] private Hitbox2D hitbox;
         [SerializeField] private AttackDefinition defaultAttack;
@@ -88,10 +89,15 @@ namespace PlantSpirit.GGJ
             {
                 GameAudio.Play(AudioCue.PlayerAttackHit);
                 WorldArtPresentation2D.SpawnBurst(center, .72f);
+                GameBootstrap.Instance?.RequestHitStop(MeleeHitStopSeconds);
+                yield return new WaitForSecondsRealtime(definition.Active + definition.Recovery);
             }
-            yield return new WaitForSeconds(definition.Active);
+            else
+            {
+                yield return new WaitForSeconds(definition.Active);
+                yield return new WaitForSeconds(definition.Recovery);
+            }
             hitbox.Close();
-            yield return new WaitForSeconds(definition.Recovery);
             attackReadyAt = Time.time + definition.Cooldown;
             locked = false;
         }

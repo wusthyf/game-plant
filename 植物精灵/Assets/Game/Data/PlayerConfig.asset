@@ -16,7 +16,7 @@ MonoBehaviour:
   MoveSpeed: 5.2
   GroundAcceleration: 45
   GroundDeceleration: 55
-  AirAcceleration: 25
+  AirAcceleration: 42
   JumpVelocity: 12.5
   MaxFallSpeed: 18
   CoyoteSeconds: 0.12

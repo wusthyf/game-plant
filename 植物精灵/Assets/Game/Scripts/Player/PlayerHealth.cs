@@ -10,6 +10,7 @@ namespace PlantSpirit.GGJ
         public float Current { get; private set; }
         public bool Dead { get; private set; }
         public event Action<float> Changed;
+        public event Action Hurt;
         public event Action Died;
         private float hurtIFrames;
         private GameSession session;
@@ -37,7 +38,7 @@ namespace PlantSpirit.GGJ
             hurtIFrames = config.HurtInvincibleSeconds;
             Changed?.Invoke(Current);
             if (Current <= 0f) { Dead = true; GameAudio.Play(AudioCue.PlayerDeath); Died?.Invoke(); }
-            else GameAudio.Play(AudioCue.PlayerHurt);
+            else { GameAudio.Play(AudioCue.PlayerHurt); Hurt?.Invoke(); }
             return true;
         }
 
@@ -49,7 +50,7 @@ namespace PlantSpirit.GGJ
             hurtIFrames = config.HurtInvincibleSeconds;
             Changed?.Invoke(Current);
             if (Current <= 0f) { Dead = true; GameAudio.Play(AudioCue.PlayerDeath); Died?.Invoke(); }
-            else GameAudio.Play(AudioCue.PlayerHurt);
+            else { GameAudio.Play(AudioCue.PlayerHurt); Hurt?.Invoke(); }
         }
     }
 }

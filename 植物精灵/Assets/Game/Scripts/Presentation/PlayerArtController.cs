@@ -15,6 +15,7 @@ namespace PlantSpirit.GGJ
         private bool oneShot;
         private float previousHealth;
         private float flashUntil;
+        private float hurtAnimationUntil;
 
         public bool HasArt => visual != null && visual.HasFrames;
 
@@ -39,7 +40,11 @@ namespace PlantSpirit.GGJ
                 combat.AttackStarted += OnAttack;
                 combat.SkillStarted += OnSkill;
             }
-            if (health != null) health.Changed += OnHealthChanged;
+            if (health != null)
+            {
+                health.Changed += OnHealthChanged;
+                health.Hurt += OnHurt;
+            }
         }
 
         private void Start() => previousHealth = health == null ? 0f : health.Current;
@@ -51,7 +56,11 @@ namespace PlantSpirit.GGJ
                 combat.AttackStarted -= OnAttack;
                 combat.SkillStarted -= OnSkill;
             }
-            if (health != null) health.Changed -= OnHealthChanged;
+            if (health != null)
+            {
+                health.Changed -= OnHealthChanged;
+                health.Hurt -= OnHurt;
+            }
         }
 
         private void Update()
@@ -59,6 +68,20 @@ namespace PlantSpirit.GGJ
             if (visual == null || motor == null) return;
             visual.SetFacingLeft(motor.Facing < 0);
             visual.SetTint(Time.unscaledTime < flashUntil ? new Color(1f, .45f, .35f) : Color.white);
+
+            if (Time.unscaledTime < hurtAnimationUntil)
+            {
+                float recoil = Mathf.Clamp01((hurtAnimationUntil - Time.unscaledTime) / .22f);
+                visual.SetWorldOffset(new Vector2(-motor.Facing * .16f * recoil, Mathf.Sin(Time.unscaledTime * 42f) * .035f));
+                visual.SetLocalAngle(motor.Facing > 0 ? 13f * recoil : -13f * recoil);
+                return;
+            }
+
+            if (oneShot && hurtAnimationUntil > 0f)
+            {
+                hurtAnimationUntil = 0f;
+                ResumeIdle();
+            }
 
             float speed = body == null ? 0f : Mathf.Abs(body.velocity.x);
             float bob = !oneShot && motor.Grounded && speed > .15f ? Mathf.Sin(Time.time * 13f) * .045f : 0f;
@@ -92,6 +115,14 @@ namespace PlantSpirit.GGJ
         {
             if (previousHealth > 0f && current < previousHealth) flashUntil = Time.unscaledTime + .12f;
             previousHealth = current;
+        }
+
+        private void OnHurt()
+        {
+            if (visual == null || health == null || health.Dead) return;
+            oneShot = true;
+            hurtAnimationUntil = Time.unscaledTime + .22f;
+            visual.Show(idle.Length > 0 ? idle[0] : null);
         }
     }
 }

@@ -15,10 +15,10 @@ MonoBehaviour:
   Id: vine_tendril
   Slot: 1
   DisplayName: "\u85E4\u8513\u89E6\u987B"
-  Description: "\u666E\u653B\u53D8\u4E3A\u85E4\u97AD\uFF1A8 \u4F24\u5BB3\u30012.8
+  Description: "\u666E\u653B\u53D8\u4E3A\u85E4\u97AD\uFF1A8 \u4F24\u5BB3\u30013.4
     \u8303\u56F4\uFF0C\u6700\u591A\u547D\u4E2D\u4E24\u4E2A\u76EE\u6807\u3002"
   DamageReduction: 0
   AttackDamage: 8
-  AttackRange: 2.8
+  AttackRange: 3.4
   Cooldown: 0.7
   BlocksProjectilesDuringDash: 0

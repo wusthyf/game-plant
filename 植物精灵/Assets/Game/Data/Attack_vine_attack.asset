@@ -19,7 +19,7 @@ MonoBehaviour:
   Active: 0.06
   Recovery: 0.14
   Cooldown: 0.7
-  Offset: {x: 1.7, y: 0.1}
-  Size: {x: 2.8, y: 0.85}
-  Range: 2.8
+  Offset: {x: 2, y: 0.1}
+  Size: {x: 3.4, y: 0.85}
+  Range: 3.4
   MaxTargets: 2

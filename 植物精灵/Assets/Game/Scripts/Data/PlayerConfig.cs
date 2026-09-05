@@ -9,7 +9,7 @@ namespace PlantSpirit.GGJ
         public float MoveSpeed = 5.2f;
         public float GroundAcceleration = 45f;
         public float GroundDeceleration = 55f;
-        public float AirAcceleration = 25f;
+        public float AirAcceleration = 42f;
         public float JumpVelocity = 12.5f;
         public float MaxFallSpeed = 18f;
         public float CoyoteSeconds = .12f;

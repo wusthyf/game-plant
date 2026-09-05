@@ -55,12 +55,12 @@ namespace PlantSpirit.GGJ.Editor
         public static void CreateContent()
         {
             if (!AssetDatabase.IsValidFolder(Data)) AssetDatabase.CreateFolder("Assets/Game", "Data");
-            PlayerConfig p = Asset<PlayerConfig>("PlayerConfig"); p.MaxHealth=100; p.MoveSpeed=5.2f; p.GroundAcceleration=45f; p.GroundDeceleration=55f; p.AirAcceleration=25f; p.JumpVelocity=12.5f; p.MaxFallSpeed=18f; p.CoyoteSeconds=.12f; p.JumpBufferSeconds=.12f; p.DashDistance=3.6f; p.DashSeconds=.22f; p.DashCooldown=1.1f; p.DashInvincibleSeconds=.18f; p.HurtInvincibleSeconds=.75f;
-            Graft("vine_tendril",GraftSlot.Stem,"藤蔓触须","普攻变为藤鞭：8 伤害、2.8 范围，最多命中两个目标。",8,2.8f,.7f,0,false);
+            PlayerConfig p = Asset<PlayerConfig>("PlayerConfig"); p.MaxHealth=100; p.MoveSpeed=5.2f; p.GroundAcceleration=45f; p.GroundDeceleration=55f; p.AirAcceleration=42f; p.JumpVelocity=12.5f; p.MaxFallSpeed=18f; p.CoyoteSeconds=.12f; p.JumpBufferSeconds=.12f; p.DashDistance=3.6f; p.DashSeconds=.22f; p.DashCooldown=1.1f; p.DashInvincibleSeconds=.18f; p.HurtInvincibleSeconds=.75f;
+            Graft("vine_tendril",GraftSlot.Stem,"藤蔓触须","普攻变为藤鞭：8 伤害、3.4 范围，最多命中两个目标。",8,3.4f,.7f,0,false);
             Graft("toxic_cap",GraftSlot.Flower,"毒菌伞","技能变为毒雾：持续 3 秒，每秒 6 伤害并减速 30%。",6,3,5,0,false);
             Graft("iron_root",GraftSlot.Root,"铁甲根","受到伤害降低 25%，冲刺前段可挡普通投射物。",0,0,0,.25f,true);
-            Attack("default_attack",AttackExecutorType.MeleeBox,10,.12f,.04f,.14f,.42f,new Vector2(.85f,.1f),new Vector2(1.2f,.85f),1.2f,1);
-            Attack("vine_attack",AttackExecutorType.VineLine,8,.14f,.06f,.14f,.7f,new Vector2(1.7f,.1f),new Vector2(2.8f,.85f),2.8f,2);
+            Attack("default_attack",AttackExecutorType.MeleeBox,10,.12f,.04f,.14f,.42f,new Vector2(1.05f,.1f),new Vector2(1.7f,.85f),1.7f,1);
+            Attack("vine_attack",AttackExecutorType.VineLine,8,.14f,.06f,.14f,.7f,new Vector2(2f,.1f),new Vector2(3.4f,.85f),3.4f,2);
             Attack("seed_skill",AttackExecutorType.Projectile,8,.08f,0,.1f,2.5f,Vector2.zero,Vector2.zero,.5f,1);
             Attack("poison_skill",AttackExecutorType.PoisonZone,6,.1f,0,.15f,5,Vector2.zero,Vector2.zero,2,1); AssetDatabase.SaveAssets();
         }

@@ -12,6 +12,7 @@ namespace PlantSpirit.GGJ
         public GameSession Session { get; } = new GameSession();
         private bool loading;
         private Coroutine deathFreezeRoutine;
+        private Coroutine hitStopRoutine;
 
         private void Awake()
         {
@@ -73,6 +74,14 @@ namespace PlantSpirit.GGJ
             State.SetState(GameState.Result);
         }
 
+        public void RequestHitStop(float duration)
+        {
+            if (State.Current != GameState.Playing || duration <= 0f || Mathf.Approximately(Time.timeScale, 0f)) return;
+            if (hitStopRoutine != null) StopCoroutine(hitStopRoutine);
+            Time.timeScale = 0f;
+            hitStopRoutine = StartCoroutine(ReleaseHitStop(duration));
+        }
+
         private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
         {
             if (scene.name == "MainMenu")
@@ -84,6 +93,11 @@ namespace PlantSpirit.GGJ
 
         private void ApplyTimeScale(GameState state)
         {
+            if (hitStopRoutine != null)
+            {
+                StopCoroutine(hitStopRoutine);
+                hitStopRoutine = null;
+            }
             if (deathFreezeRoutine != null)
             {
                 StopCoroutine(deathFreezeRoutine);
@@ -96,6 +110,13 @@ namespace PlantSpirit.GGJ
                 return;
             }
             Time.timeScale = state == GameState.Playing || state == GameState.Loading || state == GameState.MainMenu ? 1f : 0f;
+        }
+
+        private IEnumerator ReleaseHitStop(float duration)
+        {
+            yield return new WaitForSecondsRealtime(duration);
+            hitStopRoutine = null;
+            if (State.Current == GameState.Playing) Time.timeScale = 1f;
         }
 
         private IEnumerator FreezeAfterDeathDelay()
